@@ -1,6 +1,0 @@
-{
-  "name": "add-rec",
-  "partition": "Common",
-  "apiAnonymous": "proc script::init {} {\n}\n\n\nproc script::run {} {\n\n\n# argv 1  command, argv 2 data-group name ,  argv 3 JSON blob of records.\n\nset record_data [lindex $tmsh::argv 3]\n\nswitch [lindex $tmsh::argv 1] {\n\n         \"add-record\" {\n            tmsh::modify ltm data-group internal [lindex $tmsh::argv 2] records add $record_data\n            puts \"Record [lindex $tmsh::argv 3]  added.\"\n        }\n        \"edit-record\" {\n           tmsh::modify ltm data-group internal [lindex $tmsh::argv 2] records modify $record_data\n           puts \"Record changed [lindex $tmsh::argv 3].\"\n        }\n        \"delete-record\" {\n            tmsh::modify ltm data-group internal [lindex $tmsh::argv 2] records delete $record_data\n            puts \"Record [lindex $tmsh::argv 3]  deleted.\"\n        }\n        \"save\" {\n                tmsh::save sys config\n                puts \"Config saved.\"\n        }\n\n}\n\n}\n\nproc script::help {} {\n}\n\nproc script::tabc {} {\n}\n",
-  "ignoreVerification": "false"
-}
