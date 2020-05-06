@@ -1,0 +1,22 @@
+{
+  "name":"URL_map2",
+  "type":"string",
+  "records":[
+        {
+          "name":"/Audi",
+          "data":"/audiusa"
+        },
+        {
+          "name":"/bmw",
+          "data":"/bmwusa"
+        },
+        {
+          "name":"/tesla",
+          "data":"/teslamotors"
+        },
+        {
+          "name":"/ford",
+          "data":"/fordmotors"
+        }
+    ]
+ }
