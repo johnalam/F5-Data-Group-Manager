@@ -1,0 +1,38 @@
+{
+    "class": "AS3",
+    "label": "Sample Data groups",
+    "remark": "Sample data groups",
+    "action": "deploy",
+    "persist": true,
+    "declaration": {
+    	"class": "ADC",
+	    "schemaVersion": "3.18.0",
+        "id": "5489422",
+    	"Common": {
+	        "class": "Tenant",
+	        "enable": true,
+	        "Shared": {
+	            "class": "Application",
+	            "template": "shared",
+	            "URL_map2": {
+	                "class": "Data_Group",
+	                "label": "Tag values mapping",
+	                "storageType": "internal",
+	                "name": "Internal Int",
+	                "keyDataType": "string",
+	                "records": [
+	                    {
+	                        "key": "1212",
+	                        "value": "Summer"
+	                    },
+	                    {
+	                        "key": "3434",
+	                        "value": "Internal Field: \"see guide\""
+	                    }
+	                ]
+	            }
+	 
+	        }
+	    }
+    }
+}
