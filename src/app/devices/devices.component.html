@@ -1,0 +1,99 @@
+<h2>Import Data Groups</h2>
+
+<div>
+  <button mat-raised-button routerLink="/getgrpbyurl/">
+    Download Data group by URL
+  </button>&nbsp;&nbsp;&nbsp;&nbsp;
+
+  <button mat-raised-button (click)="importFromFile=true;">
+    Import from local file
+  </button>&nbsp;&nbsp;&nbsp;&nbsp;
+
+  <button mat-raised-button (click)="addGroup=true;" >
+    Create New Group
+  </button>&nbsp;&nbsp;&nbsp;&nbsp;
+
+  <button *ngIf="(groupname!='')" mat-raised-button (click)="editCurrent()" >
+    Edit Current Group
+  </button>&nbsp;&nbsp;&nbsp;&nbsp;
+
+  <button mat-raised-button (click)="openDevicesPanel()" >
+    List Devices
+  </button>
+  <p>
+
+  <div *ngIf="(importFromFile)">
+    <label>File:
+        <input type="file" (change)="onChange($event.target.files)">
+    </label><br>
+
+  <p>
+  </div>
+
+
+  <div *ngIf="(addGroup)">
+    <label>Create new group on this client:</label><br>
+    <label>Name:
+    <input [(ngModel)]="groupData.name" placeholder="Data-Group Name"/>
+    </label><br>
+    <label>Type (string, number, IP address):
+    <input [(ngModel)]="groupData.type" placeholder="Data-Group Type"/>
+    </label><br>
+      <button (click)="addNewGroup()">Create</button>
+  </div>
+
+
+<div *ngIf="openDevPanel">
+<h2>{{title}}</h2>
+
+<ul class="products">
+  <li *ngFor="let device of device_list; let i=index;">
+    <div routerLink="/products/{{device.name}}/{{device.address}}/">
+      <span class="badge">{{i+1}}</span> <span style="  display: inline-block; width:220px">{{device.name}}</span>&nbsp;
+       <span class="type">{{device.type}}</span><span style="  display: inline-block; width:270px">{{device.address}}</span>
+    </div>
+    <div>   
+    <button class="delete" title="Get Data-Groups"
+      (click)="get_dgs(device.name, device.address)">Get DGs</button>
+      &nbsp;
+
+        <button class="delete" title="Upload Scripts" (click)="upload_scripts(i, device.address)">Upload DG Scripts</button>
+      &nbsp;<button class="delete" *ngIf="(device_list[i].scriptUploadStatus!=undefined)">{{device_list[i].scriptUploadStatus}}</button>
+
+    </div>
+  </li>
+</ul>
+      <button class="delete" title="Push to all"
+      (click)="upload_scripts(device.address)">Push script to all</button>
+      &nbsp;
+
+      <button class="delete" title="Clear Panel"
+      (click)="openDevPanel=false">Clear Panel</button>
+      &nbsp;
+</div>
+
+
+<div>
+<h2>{{gptitle}}</h2>
+
+<ul class="products">
+  <li *ngFor="let grp of dataGroups; let i=index;">
+    <div (click)="records(i)">
+      <span class="badge">{{i+1}}</span> <span style="  display: inline-block; width:220px">{{grp.name}}</span> &nbsp;
+      <span class="type"> Master </span><span style="  display: inline-block; width:270px">{{grp.master}}</span>
+    </div>
+          &nbsp;
+        <button class="delete" title="Compute MD5 hash of master"
+      (click)="masterMD5Hash(i)">Compare groups to Master</button>
+          &nbsp;
+    <button *ngIf="(group_missing_on_master[i])" class="delete" title="Add Group to master"
+      (click)="addGrpToMaster(i)">Click to add starter group to master</button>
+      &nbsp;
+
+
+
+    </li>
+</ul>
+
+
+</div>

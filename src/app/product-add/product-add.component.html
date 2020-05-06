@@ -1,0 +1,19 @@
+<div>
+  <h2>Add Data-Group</h2>
+  <div>
+    <label>Group Name:
+      <input [(ngModel)]="groupData.name" placeholder="Data-Group Name"/>
+    </label><br>
+    <label>Group type (string, integer, IP ):
+      <input [(ngModel)]="groupData.type" placeholder="Data-Group type"/>
+    </label><br>
+    <label>Group Partition (default=Common):
+      <input [(ngModel)]="groupData.partition" placeholder="Data-Group Partition"/>
+    </label><br>
+    <label>Group Description (Optional):
+      <input [(ngModel)]="groupData.desc" placeholder="Data-Group Description"/>
+    </label><br>
+
+  </div>
+  <button (click)="addGroup()">Save</button>
+</div>

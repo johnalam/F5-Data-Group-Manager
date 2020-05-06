@@ -1,0 +1,29 @@
+<h2>Big-IP Internal Data-Group List</h2>
+
+<div>
+  <button mat-raised-button routerLink="/devices/">
+    Back
+  </button>&nbsp;&nbsp;&nbsp;&nbsp;
+  
+  <button mat-raised-button (click)="add()">
+    Create New Internal Data-Group
+  </button>&nbsp;&nbsp;&nbsp;&nbsp;
+
+  <button mat-raised-button routerLink="/getgrpbyurl/">
+    Download by URL
+  </button>
+
+</div>
+
+<ul class="products">
+  <li *ngFor="let p of groups; let i=index;">
+    <a (click)="records(p.name)">
+      <span class="badge">{{i+1}}</span> {{p.name}}
+    </a>
+    <button class="delete" title="delete Group"
+      (click)="delete(p.name)">x</button>
+      &nbsp;
+        <button class="delete" title="Edit Group Records"
+      (click)="records(p.name)">Records</button>
+  </li>
+</ul>

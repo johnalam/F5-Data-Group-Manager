@@ -1,0 +1,29 @@
+<div>
+  <h2>Big-IP Data-Group Record Add/Edit</h2>
+  <div>
+    
+      <div *ngIf="(this.operation=='UPDATE')"><label>Record Name/Key:&nbsp;<input  [(ngModel)]="recordData.name" placeholder="Record Name" readonly="true" /> </label></div>
+      <div *ngIf="(this.operation!='UPDATE')"><label>Record Name/Key:&nbsp;<input  [(ngModel)]="recordData.name" placeholder="Record Name" /></label></div>
+    <br>
+    <label>Record Data:
+      <input [(ngModel)]="recordData.data" placeholder="Record Data"/>
+    </label><br>
+ 
+  </div>
+  <p>
+  <button (click)="update()">{{this.operation}}</button>
+  &nbsp;
+  <button *ngIf="(this.operation=='UPDATE')"    (click)="delete(group,recordData.name)">Delete</button>
+  &nbsp;
+  <button *ngIf="(this.operation=='ADD')"    (click)="update('repeat')">Save and add another</button>
+  &nbsp;
+  <button (click)="cancel()">Cancel</button>
+</div>
+
+<div *ngIf="(op_result!='')">
+<p><p>
+  {{op_result}}
+<p>
+  {{save_results}}
+
+</div>

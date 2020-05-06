@@ -1,0 +1,174 @@
+
+<div *ngIf="group" >
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    <div class="button-row">
+      <button mat-raised-button (click)="recOps(0,group.name, '', '', 'ADD')"> Add Record </button>&nbsp;&nbsp;
+      <span *ngIf="(grpSrc=='BigIP')"><button mat-raised-button (click)="inMemRecOps(0 ,'','','','save')"> SAVE </button>&nbsp;&nbsp;</span>
+      <button mat-raised-button (click)="gotoDGList()"> Back to DG List</button>&nbsp;&nbsp;
+      <button mat-raised-button (click)="pushToOtherBigIPs()"> Push to Other Devices </button>&nbsp;&nbsp;
+      <span style="color: yellow">{{ save_results }}</span>&nbsp;&nbsp;
+      <span>Source: </span>&nbsp;<span style="color: orange">{{ grpSrc }}</span>&nbsp;&nbsp;
+
+    </div>
+    <span class="spacer"></span>
+  </mat-toolbar-row>
+</mat-toolbar>
+</div>
+
+<!-- 
+<div *ngIf="group" class="products"> 
+
+ 
+   <div>
+     <button (click)="add(group.name)">
+       Add New Record
+     </button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+     <button routerLink="/devices">
+       Back to Data-Group Import
+     </button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+     <button *ngIf="(grpSrc=='BigIP')" (click)="save()">
+       SAVE
+     </button>&nbsp;
+     {{ save_results }}&nbsp;&nbsp;&nbsp;&nbsp;
+     <button (click)="pushToOtherBigIPs()">
+       Push to other Devicess
+     </button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+     Source: {{ grpSrc }}
+   </div>
+ </div>
+-->
+
+
+   <div *ngIf="(deviceSlct)">
+   <p>
+    <mat-form-field style="width:400px;">
+     <mat-label>Devices to receive Data-Group</mat-label>
+     <mat-select #mySelect multiple (selectionChange)="getSelectedDevices($event)">
+       <mat-option *ngFor="let dev of deviceSelect" [value]="dev">{{dev}}</mat-option>
+       </mat-select>      
+
+      </mat-form-field>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <button style="display: inline;" mat-raised-button *ngIf="(selectionMade)" (click)="startPush(selected)">   GO   </button>
+      <button style="display: inline;" mat-raised-button (click)="deviceSlct=false">   Clear   </button>
+   </div>
+ 
+
+
+
+<div style="width: 50%" *ngIf="(dgPushStatus.length!=0)" class="dgPusStatus-container mat-elevation-z8">
+  <table style="width: 100%" mat-table [dataSource]="pushStatusDataSource">
+
+    <!-- Name Column 
+    <ng-container matColumnDef="label" sticky>
+      <th mat-header-cell *matHeaderCellDef> Name </th>
+      <td mat-cell *matCellDef="let element"> {{element.label}} </td>
+    </ng-container>-->
+
+    <!-- Device Name Column -->
+    <ng-container matColumnDef="dest">
+      <th mat-header-cell *matHeaderCellDef> Device Name </th>
+      <td mat-cell *matCellDef="let element"> {{element.dest}} </td>
+    </ng-container>
+
+    <!-- Results Column -->
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef> Status </th>
+      <td mat-cell *matCellDef="let element"> {{element.status}} </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="statusDisplayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: statusDisplayedColumns;"></tr>
+  </table>
+        <button style="display: inline;" mat-raised-button (click)="dgPushStatus=[]">   Clear   </button>
+</div>
+
+
+
+<div *ngIf="recOperation!=''">
+  <h2>Big-IP Data-Group Record Add/Edit</h2>
+  <div>
+
+<div *ngIf="(this.recOperation=='UPDATE')"><label>Record Name/Key:&nbsp;<input  [(ngModel)]="recordData.name" placeholder="Record Name" readonly="true" /> </label></div>
+      <div *ngIf="(this.recOperation!='UPDATE')"><label>Record Name/Key:&nbsp;<input  [(ngModel)]="recordData.name" placeholder="Record Name" /></label></div>
+<!--
+    <label>Record Name/Key:
+      <input [(ngModel)]="recordData.name" placeholder="Record Name/Key" readonly="(recOperation=='UPDATE')" />
+    </label>
+-->
+
+    <br>
+    <label>Record Data:&nbsp;
+      <input [(ngModel)]="recordData.data" placeholder="Record Data"/>
+    </label><br>
+   </div>
+  <p>
+  <button (click)="inMemRecOps(recordData.index, group.name , recordData.name, recordData.data, recOperation)">Save</button>
+  &nbsp;
+  <button *ngIf="(recOperation=='UPDATE')"    (click)="inMemRecOps(recordData.index, group.name, recordData.name, recordData.data , 'DELETE')">Delete</button>
+  &nbsp;
+  <button *ngIf="(recOperation=='ADD')"    (click)="inMemRecOps(recordData.index, group.name , recordData.name, recordData.data ,'REPEAT')">Save and add another</button>
+  &nbsp;
+  <button (click)="this.recOperation='';">Cancel</button>
+
+
+<div *ngIf="(op_result!='')">
+  <p><p>
+    {{op_result}}
+  <p>
+    {{save_results}}
+</div>
+
+</div>
+
+
+
+
+<h2>{{group.name | uppercase}} Data-group Records</h2>
+<mat-form-field>
+  <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
+</mat-form-field>
+
+<div class="mat-elevation-z8" style="width: 80%">
+  <table style="width: 100%" mat-table [dataSource]="dataSource" matSort>
+
+    <!-- ID Column -->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+      <td mat-cell *matCellDef="let row"> 
+	    <button (Click)="delete(group.name,row.name)">
+    		  Delete
+    	</button>
+
+      </td>
+    </ng-container>
+
+
+    <!-- Name Column -->
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
+      <td mat-cell *matCellDef="let row"> {{row.name}} </td>
+      <td mat-footer-cell *matFooterCellDef> Add </td>
+    </ng-container>
+
+    <!-- Color Column -->
+    <ng-container matColumnDef="data">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Data </th>
+      <td mat-cell *matCellDef="let row"> {{row.data}} </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+     <tr mat-row *matRowDef="let i=index;let row; columns: displayedColumns; "(click)="recOps(i,group.name,row.name,row.data,'UPDATE')"
+    class="example-element-row">
+    </tr>   
+<!--    <tr mat-row *matRowDef="let row; columns: displayedColumns; "(click)="onRowClicked(group.name,row.name,row.data)"
+    class="example-element-row">
+    </tr> -->
+
+  </table>
+ 
+  <mat-paginator [pageSizeOptions]="[10, 25, 100]"></mat-paginator>
+</div>
+
+
+

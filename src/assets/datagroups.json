@@ -1,0 +1,33 @@
+[
+	{
+		"name" : "offices",
+		"name_on_device": "offices",
+		"type" : "string",
+		"master": "BigIP1.company.com",
+		"devices": [
+			"BigIP1.company.com",
+			"BigIP2.company.com",
+			"10.1.1.11"
+		]
+	},
+	{
+		"name" : "cloudflare-ranges",
+		"name_on_device": "cloudflare-ranges",
+		"type" : "string",
+		"master": "BigIP2.company.com",
+		"devices": [
+			"BigIP1.company.com",
+			"BigIP2.company.com"
+		]
+	},
+	{
+		"name" : "IP_WL",
+		"on_device_name": "IP_WL",
+		"type" : "IP",
+		"master": "BigIP1.company.com",
+		"devices": [
+			"BigIP1.company.com",
+			"BigIP2.company.com"
+		]
+	}
+]

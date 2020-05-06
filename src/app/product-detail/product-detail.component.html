@@ -1,0 +1,11 @@
+<div *ngIf="group" class="products">
+  <h2>{{group.name | uppercase}} Data-group Details</h2>
+  <!-- <div><span>Description: </span>{{group.desc}}</div> !-->
+  <div><span>Type:        </span>{{group.type}}</div>
+  <!--<div><span>Update Date: </span>{{product.updated_at | date}}</div> !-->
+  <div>
+    <button routerLink="/product-edit/{{group.name}}">
+      Edit
+    </button>
+  </div>
+</div>

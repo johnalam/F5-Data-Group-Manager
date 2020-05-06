@@ -1,0 +1,41 @@
+{
+    "class": "ADC",
+    "schemaVersion": "3.0.0",
+    "id": "DG_Test",
+    "label": "Sample Data groups",
+    "remark": "Sample data groups",
+    "Sample_DG": {
+        "class": "Tenant",
+        "Application": {
+            "class": "Application",
+            "template": "generic",
+            "dataGroupRefInternal": {
+                "class": "Data_Group",
+                "label": "Tag values mapping",
+                "storageType": "internal",
+                "name": "Internal Int",
+                "keyDataType": "integer",
+                "records": [
+                    {
+                        "key": 121212,
+                        "value": "Summer"
+                    },
+                    {
+                        "key": 3434,
+                        "value": "Internal Field: \"see guide\""
+                    }
+                ]
+            },
+            "dataGroupRefExternal": {
+                "class": "Data_Group",
+                "label": "From URL or file path",
+                "storageType": "external",
+                "keyDataType": "string",
+                "externalFilePath": "http://yourfile.yourdomain.com",
+                "ignoreChanges": true,
+                "separator": ":"
+            }
+ 
+        }
+    }
+}
