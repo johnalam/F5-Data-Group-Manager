@@ -18,7 +18,7 @@ var s1 = "YWRtaW46YWRtaW4=";
 const httpOptions = {
   headers: new HttpHeaders({
     'Content-Type':  'application/json',
-    'Authorization': 'Basic '+s1,
+    //'Authorization': 'Basic '+s1,
     'target': ''
   })
 };
@@ -44,7 +44,6 @@ export class RestService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        //'Authorization': 'Basic '+s1,
         'target': dest
       })
     };
@@ -69,14 +68,13 @@ export class RestService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-      //  'Authorization': 'Basic '+s1,
         'target': dest
       })
     };
 
     return this.http.get(endpoint + elmnt + partition + id, httpOptions)
     .pipe(
-      timeout(5000),
+      timeout(10000),
       map(this.extractData),
       catchError((err: any) => {
         //console.log(err);

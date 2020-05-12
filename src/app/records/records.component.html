@@ -107,7 +107,7 @@
   &nbsp;
   <button *ngIf="(recOperation=='UPDATE')"    (click)="inMemRecOps(recordData.index, group.name, recordData.name, recordData.data , 'DELETE')">Delete</button>
   &nbsp;
-  <button *ngIf="(recOperation=='ADD')"    (click)="inMemRecOps(recordData.index, group.name , recordData.name, recordData.data ,'REPEAT')">Save and add another</button>
+  <button *ngIf="(recOperation=='add')"    (click)="inMemRecOps(recordData.index, group.name , recordData.name, recordData.data ,'REPEAT')">Save and add another</button>
   &nbsp;
   <button (click)="this.recOperation='';">Cancel</button>
 

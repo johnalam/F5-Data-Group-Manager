@@ -68,7 +68,8 @@ export class DevicesComponent implements OnInit {
   }
 
   get_dgs(name, addr) {
-   this.router.navigate(['/dataGroups/', name, addr]);
+  	this.data.setDestAddress(name);
+   	this.router.navigate(['/dataGroups/', name, addr]);
   }
 
   get_pools() {
@@ -229,14 +230,16 @@ export class DevicesComponent implements OnInit {
  
     this.rest.getgrpFromURL('/'+url, url)
       .subscribe(res => {
+      		let l = this.device_list;
       		this.device_list=res;
       		for (var x in this.device_list) {
-      			this.device_list[x].type='BigIP',
+      			this.device_list[x].type='BigIP';
       			this.device_list[x].address=this.device_list[x].connections[0];
       			this.device_hostnames[this.device_list[x].name]=this.device_list[x].address ;
+      			l[x]=this.device_list[x].name;
       			//console.log('dev array:', x, this.device_list[x].name ,this.device_hostnames[this.device_list[x].name]);
       		}
-
+      		this.data.deviceList(l);
 
         }, (err) => {
           console.log(err);

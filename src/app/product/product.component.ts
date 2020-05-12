@@ -21,7 +21,8 @@ export class ProductComponent implements OnInit {
   ngOnInit() {
     this.name = this.route.snapshot.params['id1'];
     this.address = this.route.snapshot.params['id2'];
-    this.data.setDestAddress(this.address);
+    this.data.setDestAddress(this.name);
+    console.log('-> ',this.address);
     this.data.curDevAuth.subscribe(s1 => this.s1 = s1);
     this.getProducts();
   }

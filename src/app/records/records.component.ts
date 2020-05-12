@@ -140,6 +140,7 @@ export class RecordsComponent implements OnInit {
 
 
   getRecords() {
+    console.log(this.route.snapshot.params['id'], this.destAddress, '-',this.s1);
     this.rest.getProduct(this.route.snapshot.params['id'], this.device_hostnames[this.destAddress], this.s1).subscribe((data: any) => {
       //recs=data;
       console.log('Get Records: ' );
@@ -152,9 +153,14 @@ export class RecordsComponent implements OnInit {
 
       //console.log('***',this.group);
     }, (err) => {
+      if (err.error!==undefined) {
           this.save_results=err.error.message;
           console.log('Get Records: ', err.error.message);
-        }
+      } else {
+          this.save_results=err;
+          console.log('Get Records: ', err);
+      }
+      }
     );
   }
 
@@ -173,13 +179,6 @@ export class RecordsComponent implements OnInit {
      console.log('>>> ', index, groupname, key, value, op, this.relatedDevices);
 
      if (this.grpSrc == 'BigIP' ) {
-       /*   if (op=='ADD') {
-             this.add(groupname);
-           } else if (op=='UPDATE') {
-             this.onRowClicked(groupname, key, value);
-           } else if (op== 'DELETE') {
-              this.delete(groupname, key)
-           } */
            
            //console.log('master hostname: ' , master, this.device_hostnames[this.masterAddress]);
            if (this.device_hostnames[this.masterAddress]==undefined) {
@@ -197,14 +196,6 @@ export class RecordsComponent implements OnInit {
                           this.data.changeMessage("Updated Running config only");
                           this.getRecords();
                       }
-                      if (op=="REPEAT") {
-                          this.recordData.name =  "";
-                          this.recOperation='ADD';
-                        //this.router.navigate(['/record-details/', 'ADD', this.group , '', '']);
-                      } else {
-                        //this.router.navigate(['/records/'+this.group]);
-                          this.recOperation="";
-                      }
 
                       for (var x in this.relatedDevices) {
                             let dest=this.device_hostnames[this.relatedDevices[x]];
@@ -220,6 +211,13 @@ export class RecordsComponent implements OnInit {
                                   this.data.changeMessage(err);
                                 });
                             }
+                      }
+
+                      if (op=="REPEAT") {
+                          this.recordData.name =  "";
+                          this.recOperation='add';
+                      } else {
+                          this.recOperation="";
                       }
 
 
@@ -244,7 +242,7 @@ export class RecordsComponent implements OnInit {
 
       } else {
 
-          if (op=='ADD' || op=='REPEAT') {
+          if (op=='add' || op=='REPEAT') {
               this.group.records.push({"name":key, "data":value})
               console.log(this.group);
               if (op=='REPEAT') {
@@ -291,17 +289,18 @@ export class RecordsComponent implements OnInit {
 
   recordOps (operation, groupname, record , dest ): Observable<any> {
     let oper='';
-    if (operation=='ADD' || operation=='REPEAT') {
+    if (operation=='add' || operation=='REPEAT') {
         oper='add';
     } else if ( operation=='UPDATE') {
         oper='edit';
     } else { 
         oper=operation.toLowerCase();
     }
-
+    let waitTime=15000;
     let rec:any={};
     if (operation=='save' || operation=='SAVE') {
         rec = { "command":"run" , "name":"/Common/add-rec", "utilCmdArgs": "save" };
+        waitTime=40000;
     } else {
         record.data=record.data.replace(/'/g,"`");
         //console.log('data:', record.data);
@@ -320,7 +319,7 @@ export class RecordsComponent implements OnInit {
     let endpoint="/mgmt/tm/cli/script";
 
     return this.http.post(endpoint , JSON.stringify(rec) , httpOptions).pipe(
-      timeout(5000),
+      timeout(waitTime),
       tap(_ => {
         //console.log(operation+" record id=${record.name}");
 
@@ -334,8 +333,8 @@ export class RecordsComponent implements OnInit {
 
 
   add(groupname) {
-      //this.router.navigate(['/record-details/', 'ADD', groupname , '', '']);
-      //this.Operation='ADD'
+      //this.router.navigate(['/record-details/', 'add', groupname , '', '']);
+      //this.Operation='add'
   }
 
   onRowClicked(groupname , recname, recvalue) {
@@ -370,21 +369,19 @@ export class RecordsComponent implements OnInit {
   */
  
   pushToOtherBigIPs() {
-    console.log('lists:', this.deviceList, this.device_hostnames);
+    
       var dev:any = {};
       this.deviceSelect = [];
       this.deviceMap = {};
-      this.deviceSlct=true;
+      
 
 
       if (this.grpSrc == 'BigIP' && this.save_results != 'Saved to Permanent Config') {
-        this.inMemRecOps(0 ,'','','','save');
-        this.deviceSelect = this.deviceList;
 
+        this.deviceSelect = this.deviceList;
+        console.log('lists:', this.deviceList, Object.keys(this.deviceList));
       } else {
         this.deviceList=this.device_hostnames;
-      
-
 
           for (var x in Object.keys(this.deviceList)) {
             dev=Object.keys(this.deviceList)[x];
@@ -395,6 +392,7 @@ export class RecordsComponent implements OnInit {
             //}
           }
       }
+      this.deviceSlct=true;
   }
 
   getSelectedDevices(event: any) {
@@ -435,8 +433,8 @@ export class RecordsComponent implements OnInit {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Basic '+this.s1,
-        'target': dest,
+        //'Authorization': 'Basic '+this.s1,
+        'target': dest
       })
     };
     let grp:any={};
@@ -452,9 +450,11 @@ export class RecordsComponent implements OnInit {
 
     return this.http.post<any>( '/mgmt/tm/ltm/data-group/internal/', datagroup, httpOptions).pipe(
       tap((group) => {
-        this.dgPushStatus.push({ dest: dest, label: this.deviceMap[dest], group: group, status: 'OK', operation: 'Push to Big-IPs'});
-        this.pushStatusDataSource = [...this.dgPushStatus];
-        console.log("added group w/ id=", group.name , 'to:', dest, 'Array length:', this.pushStatusDataSource.length, this.pushStatusDataSource[this.pushStatusDataSource.length - 1 ]) ;
+      
+          //this.dgPushStatus.push({ dest: dest, label: this.deviceMap[dest], group: group, status: 'OK', operation: 'Push to Big-IPs'});
+          //this.pushStatusDataSource = [...this.dgPushStatus];
+
+        console.log("Added OK:  group: ", group.name , 'to:', dest, 'Array length:', this.pushStatusDataSource.length, this.pushStatusDataSource[this.pushStatusDataSource.length - 1 ]) ;
       }),
       catchError(this.handleError<any>('Push to Big-IPs', group.name, dest))
     );

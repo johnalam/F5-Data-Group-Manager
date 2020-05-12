@@ -7,6 +7,7 @@
 		"devices": [
 			"BigIP1",
 			"BigIP2",
+			"BigIP3",
 			"10.1.1.11"
 		]
 	},
@@ -16,8 +17,19 @@
 		"type" : "string",
 		"master": "BigIP2.company.com",
 		"devices": [
-			"BigIP1",
-			"BigIP2"
+			"BigIP3",
+			"BigIP2",
+			"BigIP1"
+		]
+	},
+	{
+		"name" : "list2",
+		"name_on_device": "list2",
+		"type" : "string",
+		"master": "BigIP2",
+		"devices": [
+			"BigIP3",
+			"BigIP1"
 		]
 	},
 	{
@@ -26,8 +38,28 @@
 		"type" : "IP",
 		"master": "BigIP2",
 		"devices": [
+			"BigIP2",
 			"BigIP1",
-			"BigIP2"
+			"BigIP3",
+			"BigIP2",
+			"BigIP1",
+			"BigIP3",
+			"BigIP2",
+			"BigIP1",
+			"BigIP3",
+			"BigIP2",
+			"BigIP1",
+			"BigIP3",
+			"BigIP2",
+			"BigIP1",
+			"BigIP3",
+			"BigIP2",
+			"BigIP1",
+			"BigIP3",
+			"BigIP2",
+			"BigIP1",
+			"BigIP3"
+
 		]
 	}
 ]
