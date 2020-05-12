@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError, tap, timeout } from 'rxjs/operators';
 
 
 const endpoint = '/mgmt/tm/';
@@ -74,10 +74,12 @@ export class RestService {
       })
     };
 
-console.log('http:',httpOptions.headers);
-    return this.http.get(endpoint + elmnt + partition + id, httpOptions).pipe(
+    return this.http.get(endpoint + elmnt + partition + id, httpOptions)
+    .pipe(
+      timeout(5000),
       map(this.extractData),
       catchError((err: any) => {
+        //console.log(err);
         return throwError(err);
         })
       );

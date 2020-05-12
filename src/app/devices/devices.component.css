@@ -101,3 +101,9 @@ button.delete {
   background-color: gray !important;
   color: white;
 }
+button.message {
+  position: relative;
+  left: 650px;
+  top: -32px;
+  color: black;
+}

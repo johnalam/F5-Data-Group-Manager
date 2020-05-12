@@ -40,6 +40,7 @@ export class DevicesComponent implements OnInit {
   groupname: string = '';
   addGroup:boolean = false;
   group_missing_on_master:any = [];
+  group_fetch_response:any = [];
   relatedDevices:any = [];
   groupMaster:string ='';
   s1:string='';
@@ -67,7 +68,7 @@ export class DevicesComponent implements OnInit {
   }
 
   get_dgs(name, addr) {
-   this.router.navigate(['/products/', name, addr]);
+   this.router.navigate(['/dataGroups/', name, addr]);
   }
 
   get_pools() {
@@ -126,8 +127,11 @@ export class DevicesComponent implements OnInit {
 
 
   openRecordsPanel(i, grp, dest) {
-
-    this.rest.getProduct(grp, dest, this.s1).subscribe((group: any) => {
+	if (this.device_hostnames[dest]==undefined) {
+		this.group_fetch_response[i]='Check device to hostname mapping in devices file.';
+		return
+	}
+    this.rest.getProduct(grp, this.device_hostnames[dest], this.s1).subscribe((group: any) => {
       //recs=data; From master
       //console.log('Received data-group from master: ' , group);
       //group.master=this.groupMaster;
@@ -142,9 +146,15 @@ export class DevicesComponent implements OnInit {
 
       //console.log('***',this.group);
     }, (err) => {
-          this.group_missing_on_master[i]=true;
-          console.log('Open panel Get Records: ', err.error.message);
-        }
+	    	if (err=='TimeoutError: Timeout has occurred') {
+	    	  	this.group_fetch_response[i]='No response from Master, possible network issues.';
+	    	} else if ( err=="TypeError: Cannot read property 'length' of undefined") {
+				this.group_fetch_response[i]='Check device to hostname mapping in devices file.';
+	    	} else {
+	          this.group_missing_on_master[i]=true;
+	    	}
+    	    //console.log('Open panel Get Records: ', err );
+	   }
     );
   }
 

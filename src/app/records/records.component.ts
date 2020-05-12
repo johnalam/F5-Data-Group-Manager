@@ -9,8 +9,8 @@ import {MatTableDataSource} from '@angular/material/table';
 
 
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
+import { Observable, of , throwError} from 'rxjs';
+import { map, catchError, tap, timeout } from 'rxjs/operators';
 
 import { DataService } from "../data.service";
 
@@ -140,8 +140,7 @@ export class RecordsComponent implements OnInit {
 
 
   getRecords() {
-
-    this.rest.getProduct(this.route.snapshot.params['id'], this.destAddress, this.s1).subscribe((data: any) => {
+    this.rest.getProduct(this.route.snapshot.params['id'], this.device_hostnames[this.destAddress], this.s1).subscribe((data: any) => {
       //recs=data;
       console.log('Get Records: ' );
       this.group = data;
@@ -183,13 +182,21 @@ export class RecordsComponent implements OnInit {
            } */
            
            //console.log('master hostname: ' , master, this.device_hostnames[this.masterAddress]);
-           if (this.device_hostnames[this.masterAddress]!=undefined) {
+           if (this.device_hostnames[this.masterAddress]==undefined) {
+                this.dgPushStatus.push({ dest: this.masterAddress, label: this.masterAddress, group: "", status: "Could not find destination hostname", operation: op});
+                this.data.changeMessage('No hostname for '+ this.masterAddress);
+           } else {
+
                let dest=this.device_hostnames[this.masterAddress];
-               if (op != 'save') {
+//               if (op != 'save') {
                   this.recordOps(op, groupname, this.recordData, dest).subscribe((result) => {
-                      this.data.changeMessage("Updated running config only.");
-                      this.getRecords();
-                      console.log ('Master Device update:', this.masterAddress, dest , 'Other devices: ', this.relatedDevices);
+                      console.log ('Master Device updated:', this.masterAddress, dest , 'Other devices: ', this.relatedDevices);
+                      if (op=='save') {
+                          this.data.changeMessage("Saved to Permanent Config") ;
+                      } else {
+                          this.data.changeMessage("Updated Running config only");
+                          this.getRecords();
+                      }
                       if (op=="REPEAT") {
                           this.recordData.name =  "";
                           this.recOperation='ADD';
@@ -198,12 +205,30 @@ export class RecordsComponent implements OnInit {
                         //this.router.navigate(['/records/'+this.group]);
                           this.recOperation="";
                       }
+
+                      for (var x in this.relatedDevices) {
+                            let dest=this.device_hostnames[this.relatedDevices[x]];
+                            if (dest==undefined) {
+                                this.dgPushStatus.push({ dest: this.relatedDevices[x], label: this.relatedDevices[x] , group: groupname, status: 'Device hostname not found. '+op+' operation aborted.', operation: op});
+                                this.pushStatusDataSource = [...this.dgPushStatus];
+                            } else {
+                                this.recordOps(op, groupname, this.recordData, dest).subscribe((result) => {
+                                  console.log ('Subordinate Device updated:', dest);
+                                }, (err) => {
+                                  console.log(err);
+                                  this.dgPushStatus.push({ dest: dest, label: this.relatedDevices[x] , group: groupname, status: err, operation: op});
+                                  this.data.changeMessage(err);
+                                });
+                            }
+                      }
+
+
                   }, (err) => {
-                      this.dgPushStatus.push({ dest: dest, label: this.masterAddress , group: groupname, status: err, operation: op});
-                      console.log(err);
-                      this.data.changeMessage(err);
+                      this.dgPushStatus.push({ dest: dest, label: this.masterAddress , group: groupname, status: op+' Failed on Master, Aborting.', operation: op});
+                      this.pushStatusDataSource = [...this.dgPushStatus];
+                      this.data.changeMessage( (op === 'save') ? 'Not Saved': op+' Failed.');
                   });
-              } else {
+/*              } else {
                   this.recordOps('save',groupname, this.recordData, dest).subscribe((result) => {
                       this.data.changeMessage("Saved to Permanent Config");
                       console.log ('Master Device update:', this.masterAddress, dest);
@@ -212,24 +237,9 @@ export class RecordsComponent implements OnInit {
                       this.dgPushStatus.push({ dest: dest, label: this.masterAddress, group: "", status: err, operation: op});
                       this.data.changeMessage(err);
                   });
-              }      
+              }*/
 
-              for (var x in this.relatedDevices) {
-                    let dest=this.device_hostnames[this.relatedDevices[x]];
-                    console.log('Related device:',dest);
-                    if (dest!=undefined) {
-                        this.recordOps(op, groupname, this.recordData, dest).subscribe((result) => {
-                          console.log ('Related Device updated:', dest);
-                        }, (err) => {
-                          console.log(err);
-                          this.dgPushStatus.push({ dest: dest, label: this.relatedDevices[x] , group: groupname, status: err, operation: op});
-                          this.data.changeMessage(err);
-                        });
-                    }
-              }
-          } else {
-            this.dgPushStatus.push({ dest: this.masterAddress, label: this.masterAddress, group: "", status: "Could not find destination hostname", operation: op});
-            this.data.changeMessage('No hostname for '+ this.masterAddress);
+
           }
 
       } else {
@@ -310,11 +320,14 @@ export class RecordsComponent implements OnInit {
     let endpoint="/mgmt/tm/cli/script";
 
     return this.http.post(endpoint , JSON.stringify(rec) , httpOptions).pipe(
+      timeout(5000),
       tap(_ => {
         //console.log(operation+" record id=${record.name}");
 
       }),
-      catchError(this.handleError<any>('Failed: ' + rec, groupname, dest))
+    catchError(
+        this.handleError<any>('Failed: ' + rec.utilCmdArgs, groupname, dest)
+      )
     );
   }
 
@@ -451,18 +464,28 @@ export class RecordsComponent implements OnInit {
   handleError<T> (operation = 'operation', group, dest, result?: T) {
     return (error: any): Observable<T> => {
 
+
       // TODO: send the error to remote logging infrastructure
       //console.error(error.error.message); // log to console instead
-      console.error(error);
+      
       // TODO: better job of transforming error for user consumption
       //console.log(dest, `${operation} failed: ${error.message}`);
 
-      this.dgPushStatus.push({ dest: dest, label: this.deviceMap[dest], group: group, status: error.error.message, operation: operation});
+      //console.log('Error Timeout ->', JSON.stringify(error).substr(9,12) );
+      //console.log('Error Timeout1->', JSON.stringify(error).indexOf('TimeoutError') );
+
+      if (JSON.stringify(error).indexOf('Timeout') !== -1) {
+        this.dgPushStatus.push({ dest: dest, label: this.deviceMap[dest], group: group, status: 'No response from device, possible network issues.', operation: operation});
+        this.pushStatusDataSource = [...this.dgPushStatus];
+        return throwError(error);
+      }
+
+      this.dgPushStatus.push({ dest: dest, label: this.deviceMap[dest], group: group, status: operation, operation: operation});
       this.pushStatusDataSource = [...this.dgPushStatus];
-      console.log ('Push Status:', this.pushStatusDataSource);
 
       // Let the app keep running by returning an empty result.
-      return of(result as T);
+      //return of(result as T);
+      return throwError(error.error.message);
     };
   }
 

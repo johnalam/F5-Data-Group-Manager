@@ -3,10 +3,10 @@
 		"name" : "offices",
 		"name_on_device": "offices",
 		"type" : "string",
-		"master": "BigIP1.company.com",
+		"master": "BigIP1",
 		"devices": [
-			"BigIP1.company.com",
-			"BigIP2.company.com",
+			"BigIP1",
+			"BigIP2",
 			"10.1.1.11"
 		]
 	},
@@ -16,18 +16,18 @@
 		"type" : "string",
 		"master": "BigIP2.company.com",
 		"devices": [
-			"BigIP1.company.com",
-			"BigIP2.company.com"
+			"BigIP1",
+			"BigIP2"
 		]
 	},
 	{
 		"name" : "IP_WL",
 		"on_device_name": "IP_WL",
 		"type" : "IP",
-		"master": "BigIP1.company.com",
+		"master": "BigIP2",
 		"devices": [
-			"BigIP1.company.com",
-			"BigIP2.company.com"
+			"BigIP1",
+			"BigIP2"
 		]
 	}
 ]

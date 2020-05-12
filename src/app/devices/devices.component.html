@@ -48,7 +48,7 @@
 
 <ul class="products">
   <li *ngFor="let device of device_list; let i=index;">
-    <div routerLink="/products/{{device.name}}/{{device.address}}/">
+    <div routerLink="/dataGroups/{{device.name}}/{{device.address}}/">
       <span class="badge">{{i+1}}</span> <span style="  display: inline-block; width:220px">{{device.name}}</span>&nbsp;
        <span class="type">{{device.type}}</span><span style="  display: inline-block; width:270px">{{device.address}}</span>
     </div>
@@ -58,14 +58,14 @@
       &nbsp;
 
         <button class="delete" title="Upload Scripts" (click)="upload_scripts(i, device.address)">Upload DG Scripts</button>
-      &nbsp;<button class="delete" *ngIf="(device_list[i].scriptUploadStatus!=undefined)">{{device_list[i].scriptUploadStatus}}</button>
+      &nbsp;<button class="message" *ngIf="(device_list[i].scriptUploadStatus!=undefined)">{{device_list[i].scriptUploadStatus}}</button>
 
     </div>
   </li>
 </ul>
-      <button class="delete" title="Push to all"
+      <!--<button class="delete" title="Push to all"
       (click)="upload_scripts(device.address)">Push script to all</button>
-      &nbsp;
+      &nbsp; -->
 
       <button class="delete" title="Clear Panel"
       (click)="openDevPanel=false">Clear Panel</button>
@@ -89,6 +89,8 @@
     <button *ngIf="(group_missing_on_master[i])" class="delete" title="Add Group to master"
       (click)="addGrpToMaster(i)">Click to add starter group to master</button>
       &nbsp;
+    <button *ngIf="(group_fetch_response[i])" class="message" style="background-color: red" title="Group fetch response"
+      >{{group_fetch_response[i]}}</button>
 
 
 

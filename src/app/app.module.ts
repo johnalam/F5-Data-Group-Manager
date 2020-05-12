@@ -25,7 +25,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 
 const appRoutes: Routes = [
   {
-    path: 'products/:id1/:id2',
+    path: 'dataGroups/:id1/:id2',
     component: ProductComponent,
     data: { title: 'Product List' }
   },

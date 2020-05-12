@@ -1,6 +1,6 @@
 [
   {
-    "name": "BigIP1.company.com",
+    "name": "BigIP1",
     "description": "",
     "connections": [
       "BigIP1.company.com",
@@ -8,7 +8,7 @@
     ]
   },
   {
-    "name": "BigIP2.company.com",
+    "name": "BigIP2",
     "description": "",
     "connections": [
       "BigIP2.company.com:8443",
