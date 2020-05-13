@@ -7,30 +7,31 @@ Manage iRule data-groups from a central location.
 
 Requirements:
 
-1- dg-app-dist.zip file from this depository.
+	1- dg-app-dist.zip file from this depository.
 
-    *Expand this file in the nginx root html directory.  /usr/share/nginx/html
+	    *Expand this file in the nginx root html directory.  /usr/share/nginx/html
 
-2- NGINX web server and reverse proxy.  
+	2- NGINX web server and reverse proxy.  
 
-    *Use provided default.conf file in the nginx directory. Put this file in /etc/nginx/confg.d. 
+	    *Use provided default.conf file in the nginx directory. Put this file in /etc/nginx/confg.d. 
 
-    *The /etc/nginx/nginx.conf file can remain at default.
+	    *The /etc/nginx/nginx.conf file can remain at default.
 
-3- A file name datagroups.json and another file named devices.json.  Both in JSON format.  You can find sample under "assets" directory in the dg-app-dist.zip file as well as under "src/asset".
+	3- A file name datagroups.json and another file named devices.json.  Both in JSON format.  You can find sample under "assets" directory in the dg-app-dist.zip file as well as under "src/asset".
 
-4- A username and password for a service account that works on all BigIPs.
+	4- A username and password for a service account that works on all BigIPs.
 
-    *The service account only needs permission to manage data-groups, "LTM manager".  
+	    *The service account only needs permission to manage data-groups, "LTM manager".  
 
-    *You must configure these credentials in the NGINX default.conf file.  See provided default.conf file for and example. 
+	    *You must configure these credentials in the NGINX default.conf file.  See provided default.conf file for and example. 
 
-    *The App sends the creds to the BigIP using Basic auth.  
+	    *The App sends the creds to the BigIP using Basic auth.  
 
-    *You will need to encode "username:password" in base64 and update the default.conf file with new value.  
+	    *You will need to encode "username:password" in base64 and update the default.conf file with new value.  
 
-    * This is the line that needs to change:
-		proxy_set_header Authorization 'Basic YWRtaW46YWRtaW4=';
+	    * This is the line that needs to change:
+			proxy_set_header Authorization 'Basic YWRtaW46YWRtaW4=';
+
 
 
 
@@ -47,7 +48,7 @@ Under /src/assets you will find examples of files to track F5 BigIP devices as w
 
 Only internal data-groups are handled initially.
 
-In order to add/edit/delete on record at a time, this app relies on a BigIP TMSH CLI script.  The name of the script is "add-rec" initially.  Will chave that soon.
+In order to add/edit/delete one record at a time, this app relies on a BigIP TMSH CLI script.  The name of the script is "add-rec" initially.  Will change the name soon.
 
 The script must be uploaded to the BigIPs that you wish to do single record CRUD for.  There are two versions of the script under assets directory.
 

@@ -85,7 +85,33 @@
           &nbsp;
         <button class="delete" title="Compute MD5 hash of master"
       (click)="masterMD5Hash(i)">Compare groups to Master</button>
-          &nbsp;
+      &nbsp;
+
+
+    <button *ngIf="(device_hostnames[grp.master]==undefined )" class="message" style="background-color: red" title="All inSync"
+      > Master name not in hotname list </button>
+      &nbsp;
+
+
+    <button *ngIf="(noHostnameSub[i] && noHostnameSub[i].length !=0)" class="message" style="background-color: red" title="All inSync"
+      >{{noHostnameSub[i].length}} subs with bad names</button>
+      &nbsp; 
+
+
+    <button *ngIf="(not_inSync_with_master[i] && not_inSync_with_master[i].length!=0)" class="message" style="background-color: red" title="inSync Check"
+      >{{not_inSync_with_master[i].length}} out of {{dataGroups[i].devices.length}} devices NOT IN SYNC with Master</button>
+      &nbsp; 
+
+
+    <button *ngIf="(noHostnameSub[i] && match_with_master[i].length + noHostnameSub[i].length == dataGroups[i].devices.length)" class="message" style="background-color: lightgreen" title="All inSync"
+      >{{match_with_master[i].length}} out of {{dataGroups[i].devices.length}} devices IN SYNC with Master</button>
+      &nbsp;
+
+
+
+
+
+
     <button *ngIf="(group_missing_on_master[i])" class="delete" title="Add Group to master"
       (click)="addGrpToMaster(i)">Click to add starter group to master</button>
       &nbsp;
