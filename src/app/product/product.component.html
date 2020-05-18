@@ -16,14 +16,14 @@
 </div>
 
 <ul class="products">
-  <li *ngFor="let p of groups; let i=index;">
-    <a (click)="records(p.name)">
-      <span class="badge">{{i+1}}</span> {{p.name}}
+  <li *ngFor="let grp of groups; let i=index;">
+    <a (click)="records(grp.name)">
+      <span class="badge">{{i+1}}</span> {{grp.name}}
     </a>
     <button class="delete" title="delete Group"
-      (click)="delete(p.name)">x</button>
+      (click)="delete(grp.name)">x</button>
       &nbsp;
         <button class="delete" title="Edit Group Records"
-      (click)="records(p.name)">Records</button>
+      (click)="records(grp.name)">Records</button>
   </li>
 </ul>

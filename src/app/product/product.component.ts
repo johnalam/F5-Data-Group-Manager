@@ -12,8 +12,10 @@ export class ProductComponent implements OnInit {
 
   products:any = [];
   groups:any = [];
+  device_hostnames:any =[];
   name:any = "";
   address:any = "";
+  device_name:any ="";
   s1:any= "";
 
   constructor(public rest:RestService, private route: ActivatedRoute, private router: Router, private data: DataService) { }
@@ -21,17 +23,17 @@ export class ProductComponent implements OnInit {
   ngOnInit() {
     this.name = this.route.snapshot.params['id1'];
     this.address = this.route.snapshot.params['id2'];
-    this.data.setDestAddress(this.name);
-    console.log('-> ',this.address);
+    this.data.devAddress.subscribe(device_name=> this.device_name = device_name);
     this.data.curDevAuth.subscribe(s1 => this.s1 = s1);
-    this.getProducts();
+    this.data.allDeviceHostnames.subscribe(device_hostnames => this.device_hostnames = device_hostnames);
+    this.getGroupsFromDevice();
   }
 
-  getProducts() {
+  getGroupsFromDevice() {
     this.groups = [];
     const elmnt = 'ltm/data-group/internal';
     //this.products = [];
-    this.rest.getProducts(elmnt, this.address, this.s1).subscribe((data: any) => {
+    this.rest.getGroupsFromDevice(elmnt, this.device_hostnames[this.device_name], this.s1).subscribe((data: any) => {
       //console.log(data.items);
 
       // todo:  data.service should be imported and grpSrc should be set to 'BigIP' here.
@@ -46,19 +48,29 @@ export class ProductComponent implements OnInit {
   }
 
   add() {
-    this.router.navigate(['/product-add/'+this.address]);
+    this.router.navigate(['/product-add/'+this.device_name]);
   }
 
    records(groupname) {
     this.data.setGrpSource('BigIP');
+    
+    let grp={
+      "name": groupname,
+      "on_box_name": groupname,
+      "master": this.device_name,
+      "devices": [],
+    };
     this.data.setGrpData({});
+
+    this.data.setCurrentGroup(grp);
+
     this.router.navigate(['/records/' + groupname]);
   }
 
   delete(name) {
-    this.rest.deleteDataGroup(name, this.address, this.s1)
+    this.rest.deleteDataGroup(name, this.device_name, this.s1)
       .subscribe(res => {
-          this.getProducts();
+          this.getGroupsFromDevice();
         }, (err) => {
           console.log(err);
         }

@@ -14,7 +14,7 @@ export class ProductEditComponent implements OnInit {
   constructor(public rest:RestService, private route: ActivatedRoute, private router: Router) { }
 
   ngOnInit() {
-    this.rest.getProduct(this.route.snapshot.params['id'], '', '').subscribe((data: {}) => {
+    this.rest.getGrpFromDevice(this.route.snapshot.params['id'], '', '').subscribe((data: {}) => {
       console.log(data);
       this.productData = data;
     });

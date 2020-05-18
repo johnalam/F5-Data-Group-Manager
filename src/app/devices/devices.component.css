@@ -13,7 +13,7 @@
   padding: .3em 0;
   height: 1.6em;
   border-radius: 4px;
-   width: 40em;
+   width: 41em;
 }
 
 .products li:hover {
@@ -96,14 +96,14 @@ button:hover {
 
 button.delete {
   position: relative;
-  left: 650px;
+  left: 675px;
   top: -32px;
   background-color: gray !important;
   color: white;
 }
 button.message {
   position: relative;
-  left: 650px;
+  left: 675px;
   top: -32px;
   color: black;
 }

@@ -73,6 +73,7 @@ export class RecordsComponent implements OnInit {
   recordValue:string = "";
   // device_hostnames is all the devices.
   device_hostnames:any=[];
+  currentDevice:any={};
   s1:any='';
 
   
@@ -83,25 +84,28 @@ export class RecordsComponent implements OnInit {
     //load the list of devices to manage, this can be per data-group or all bigips.
     // If per group, then it is set by "devices" component from data-group record on file.
     // If all bigips then it is from devices file on record.
-    this.data.currentDeviceList.subscribe(deviceList => this.deviceList = deviceList);
-    this.relatedDevices = this.deviceList;
+    this.data.currentDevice.subscribe(currentDevice => this.currentDevice = currentDevice);
+    this.relatedDevices = this.currentDevice.devices;
+    this.deviceList = this.currentDevice.devices;
     this.data.allDeviceHostnames.subscribe(device_hostnames => this.device_hostnames = device_hostnames);
 
     //this.downloadAuth("dgapp1.json");    
     this.data.curDevAuth.subscribe(s1 => this.s1 = s1);
 
     //load the group records to display on page
-    this.data.grp_results.subscribe(results => {
-      this.results = results;
-    })
+    this.data.grp_results.subscribe(results => {this.results = results;})
 
     // load the source of the group data URL/BigIP/File etc..
     this.data.grp_source.subscribe(grpSrc => this.grpSrc = grpSrc );
 
 
-    // load IP address of BigIP currently getting records from, this is the "master"
-    this.data.devAddress.subscribe(destAddress => this.destAddress = destAddress );
-    this.masterAddress = this.destAddress;
+    // load IP address of BigIP currently getting records from, 
+    // if we start with the data-group panel, this is the "master"
+    // if we start with the devices panel, this is the chosen device before choosing a data-group.
+    this.masterAddress = this.currentDevice.master;
+
+    //this.data.devAddress.subscribe(destAddress => this.destAddress = destAddress );
+console.log('Recs:', this.currentDevice);
 
 
     if (Object.getOwnPropertyNames(this.results).length === 0 ) {
@@ -140,8 +144,8 @@ export class RecordsComponent implements OnInit {
 
 
   getRecords() {
-    console.log(this.route.snapshot.params['id'], this.destAddress, '-',this.s1);
-    this.rest.getProduct(this.route.snapshot.params['id'], this.device_hostnames[this.destAddress], this.s1).subscribe((data: any) => {
+    console.log(this.route.snapshot.params['id'], this.masterAddress, '-',this.s1);
+    this.rest.getGrpFromDevice(this.route.snapshot.params['id'], this.device_hostnames[this.masterAddress], this.s1).subscribe((data: any) => {
       //recs=data;
       console.log('Get Records: ' );
       this.group = data;
@@ -345,7 +349,7 @@ export class RecordsComponent implements OnInit {
     this.rest.deleteRecord(group, name, ' ', this.s1)
       .subscribe(res => {
           this.getRecords();
-          this.save_results="Written to running config only.";
+          this.save_results="Saved to running config only.";
         }, (err) => {
           console.log(err);
         }

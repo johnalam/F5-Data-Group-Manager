@@ -48,12 +48,15 @@ Under /src/assets you will find examples of files to track F5 BigIP devices as w
 
 Only internal data-groups are handled initially.
 
-In order to add/edit/delete one record at a time, this app relies on a BigIP TMSH CLI script.  The name of the script is "add-rec" initially.  Will change the name soon.
+In order to add/edit/delete one record at a time, this app relies on a BigIP TMSH CLI script.  The script is 'RUN' or executed via a REST API request.  The operation (add, edit, delete) is passed along to the script along with the data in the API request POST body.  This is equivalent to running the script from the TMSH CLI.  The name of the script is "add-rec" initially.
 
-The script must be uploaded to the BigIPs that you wish to do single record CRUD for.  There are two versions of the script under assets directory.
+The script must be uploaded to the BigIPs.  The App provides a way to upload the script to one device at a time via a single click.  Open the "List Devices" panel to see the Button.
+	* NOTE: you need to save the config for the script upload to survive a BigIP reboot.  For now, the only way to save config from the App is in the data-group editing screen.
 
-	*dg_script_ready_for_POST.json .  this file ready to be POSTed to the BigIP via a REST call.  The App helps with this.  You can use the App to list all the devices found in devices.json and click the button to upload the script.
+There are two versions of the script under assets directory:
 
-	*records_CRUD_Script , a human readable version of the script.  Note, it may not always be the latest.
+	1- dg_script_ready_for_POST.json .  this file ready to be POSTed to the BigIP via a REST call.  The App helps with this.  You can use the App to list all the devices found in devices.json and click the button to upload the script.
+
+	2- records_CRUD_Script , a human readable version of the script.  Note, it may not always be the latest.
 
 

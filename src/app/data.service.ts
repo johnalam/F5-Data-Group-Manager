@@ -19,8 +19,12 @@ export class DataService {
   private grpSource = new BehaviorSubject('BigIP');
   
   /* List of devices for presenting choices*/
+  currentDev = new BehaviorSubject({});
+  currentDevice = this.currentDev.asObservable();
+
+  // List of all devices from devices.JSON wiht indexing
   devList = new BehaviorSubject({});
-  currentDeviceList = this.devList.asObservable();
+  allDeviceInfoList = this.devList.asObservable();
 
   /* map of all device name to hostname */
   devHostnames = new BehaviorSubject({});
@@ -61,8 +65,12 @@ export class DataService {
    }
 
   /* List of devices for presenting choice, can be variabl*/
-   deviceList(dev) {
-   	  this.devList.next(dev)
+   setCurrentGroup(dev) {
+   	  this.currentDev.next(dev)
+   }
+
+   allDeviceList(list) {
+      this.devList.next(list);
    }
 
    /* hostnameList is the map of hostname to device name */

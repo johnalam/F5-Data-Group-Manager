@@ -39,7 +39,7 @@ export class RestService {
 
 
 
-  getProducts(elmnt, dest, s1): Observable<any> {
+  getGroupsFromDevice(elmnt, dest, s1): Observable<any> {
 
     const httpOptions = {
       headers: new HttpHeaders({
@@ -64,7 +64,7 @@ export class RestService {
       map(this.extractData));
   }
 
-  getProduct(id, dest, s1): Observable<any> {
+  getGrpFromDevice(id, dest, s1): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',

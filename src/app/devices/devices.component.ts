@@ -63,7 +63,6 @@ export class DevicesComponent implements OnInit {
    	  this.data.setAuth(this.s1);
 
 	  
-  	  //this.data.deviceList(devices);
   	  this.data.grp_results.subscribe(results => {
       	this.results = results;
 
@@ -73,9 +72,10 @@ export class DevicesComponent implements OnInit {
        }
   }
 
-  get_dgs(name, addr) {
-  	this.data.setDestAddress(name);
-   	this.router.navigate(['/dataGroups/', name, addr]);
+  get_dgs(device_name, addr) {
+  	this.data.setDestAddress(device_name);
+  	// /data-groups maps top the product component.  Until i rename the component.
+   	this.router.navigate(['/dataGroups/', device_name, addr]);
   }
 
   get_pools() {
@@ -133,23 +133,21 @@ export class DevicesComponent implements OnInit {
   }
 
 
-  openRecordsPanel(i, grp, dest) {
-	if (this.device_hostnames[dest]==undefined) {
+  records(i) {
+	if (this.device_hostnames[this.dataGroups[i].master]==undefined) {
 		this.group_fetch_response[i]='Check device to hostname mapping in devices file.';
 		return
 	}
-    this.rest.getProduct(grp, this.device_hostnames[dest], this.s1).subscribe((group: any) => {
-      //recs=data; From master
-      //console.log('Received data-group from master: ' , group);
-      //group.master=this.groupMaster;
-      //group.devices=this.relatedDevices;
-      //group.source='BigIP';
+    this.rest.getGrpFromDevice(this.dataGroups[i].on_box_name, this.device_hostnames[this.dataGroups[i].master], this.s1).subscribe((group: any) => {
+    	// group:  datagroup records from BigIP.
+    	// dataGroups[i] is datagroup metadata from datagroups.JSON file.
    	  this.data.setGrpData(group);
    	  this.data.setGrpSource('BigIP');
- 	  this.data.deviceList(this.dataGroups[i].devices);
+   	  // Not sure why i did not name tht currentGroup, instead of currentDevice
+ 	  this.data.setCurrentGroup(this.dataGroups[i]);
       this.group_missing_on_master[i]=true;
       this.dataGroups[i].exists = 'yes';
-	  this.router.navigate(['/records/'+ this.dataGroups[i].name]);
+	  this.router.navigate(['/records/'+ this.dataGroups[i].on_box_name]);
 
       //console.log('***',this.group);
     }, (err) => {
@@ -158,7 +156,7 @@ export class DevicesComponent implements OnInit {
 	    	} else if ( err=="TypeError: Cannot read property 'length' of undefined") {
 				this.group_fetch_response[i]='Check device to hostname mapping in devices file.';
 	    	} else {
-	          this.group_missing_on_master[i]=true;
+	          	this.group_missing_on_master[i]=true;
 	    	}
     	    //console.log('Open panel Get Records: ', err );
 	   }
@@ -166,15 +164,15 @@ export class DevicesComponent implements OnInit {
   }
 
 
-  records(i) {
+ /* records(i) {
   	this.data.setDestAddress(this.dataGroups[i].master);
   	this.groupMaster = this.dataGroups[i].master;
-  	this.relatedDevices = this.dataGroups[i].devices;
-  	this.data.deviceList(this.dataGroups[i].devices);
-    this.data.setGrpSource('BigIP');
+  	//this.relatedDevices = this.dataGroups[i].devices;
+  	//this.data.deviceList(this.dataGroups[i].devices);
+    //this.data.setGrpSource('BigIP');
     this.openRecordsPanel(i ,this.dataGroups[i].name, this.dataGroups[i].master);
   }
-
+*/
 
 
   addGrpToMaster(i) {
@@ -233,7 +231,7 @@ export class DevicesComponent implements OnInit {
   }
 
   downloadDevicesList(url) {
- 
+  // this procedure loads the devices list from devices.JSON
     this.rest.getgrpFromURL('/'+url, url)
       .subscribe(res => {
       		let l = this.device_list;
@@ -245,8 +243,8 @@ export class DevicesComponent implements OnInit {
       			l[x]=this.device_list[x].name;
       			//console.log('dev array:', x, this.device_list[x].name ,this.device_hostnames[this.device_list[x].name]);
       		}
-      		this.data.deviceList(l);
-
+      		// Below saves list of devices in the DataServuce,  Get the same list using: allDeviceInfoList
+      		this.data.allDeviceList(l);
         }, (err) => {
           console.log(err);
         }
@@ -258,7 +256,7 @@ export class DevicesComponent implements OnInit {
 
   	let dest=this.device_hostnames[this.dataGroups[i].master];
   	if (dest!=undefined) {
-	  	this.rest.getProduct(this.dataGroups[i].name, dest, this.s1).subscribe((group :any) => {
+	  	this.rest.getGrpFromDevice(this.dataGroups[i].on_box_name, dest, this.s1).subscribe((group :any) => {
 			this.not_inSync_with_master[i] = [];
 			this.match_with_master[i] = [];
 			this.noHostnameSub[i] = [];
@@ -272,29 +270,29 @@ export class DevicesComponent implements OnInit {
 	                if (dest != undefined) {
 	                		let y=x;
 	                		let dest1=dest;
-			                this.rest.getProduct(this.dataGroups[i].name, dest1, this.s1).subscribe((group :any) => {
+			                this.rest.getGrpFromDevice(this.dataGroups[i].on_box_name, dest1, this.s1).subscribe((group :any) => {
 							  	hash = MD5(group.records.toString()).toString();
 							  	let match='';
 							  	if (hash===masterHash) {
 							  		match = 'Match with Master' ;
-							  		this.match_with_master[i].push(this.dataGroups[i].name);
+							  		this.match_with_master[i].push(this.dataGroups[i].on_box_name);
 							  	} else {
 							  		match = 'Does **NOT** match Master';
-							  		this.not_inSync_with_master[i].push(this.dataGroups[i].name);
+							  		this.not_inSync_with_master[i].push(this.dataGroups[i].on_box_name);
 							  	}
 							  	console.info ('Records MD5:', hash, this.dataGroups[i].devices[y] ,dest1, match, this.noHostnameSub[i].length, this.not_inSync_with_master[i].length, this.match_with_master[i].length, this.dataGroups[i].devices.length);
 			                }, (err) => {
-			                  console.log('Error while retrieving Subordinate group records:', this.dataGroups[i].name, dest1, err);
-			                  this.noHostnameSub[i].push(this.dataGroups[i].name);
+			                  console.log('Error while retrieving Subordinate group records:', this.dataGroups[i].on_box_name, dest1, err);
+			                  this.noHostnameSub[i].push(this.dataGroups[i].on_box_name);
 			                });
 			        } else {
 			        	console.error('Hostname not found for:' , this.dataGroups[i].devices[x]);
-						this.noHostnameSub[i].push(this.dataGroups[i].name);
+						this.noHostnameSub[i].push(this.dataGroups[i].on_box_name);
 			        }
 	          }
 
 	  	}, (err) => {
-	      console.log('Error Getting Master Rrecods for MD5:',dest, '-',this.dataGroups[i].name, err.error.message);
+	      console.log('Error Getting Master Rrecods for MD5:',dest, '-',this.dataGroups[i].on_box_name, err.error.message);
 	    }
   		);
 	} else {
