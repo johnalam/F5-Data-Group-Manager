@@ -147,17 +147,76 @@ export class RestService {
     );
   }
 
-  recordOps (operation, groupname, record ): Observable<any> {
-    let oper = (operation == 'ADD') ? "add" : "edit";
-    let rec = { "command":"run" , "name":"/Common/add-rec", "utilCmdArgs": oper +"-record " + groupname + " \'\{"+ record.name + "{ data "+ record.data +"\}\}\'" };
+  recordOps (operation, groupname, record, dest , s1): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        //'Authorization': 'Basic '+s1,
+        'target': dest
+      })
+    };
+
+    let rec = {};
+    if ( operation == 'replace-all') {
+      rec = { "command":"run" , "name":"/Common/add-rec", "utilCmdArgs": "replace-all " + groupname + " \'" + record + "\'"}
+    } else {
+      let oper = (operation == 'ADD') ? "add" : "edit";
+      rec = { "command":"run" , "name":"/Common/add-rec", "utilCmdArgs": oper +"-record " + groupname + " \'\{"+ record.name + "{ data "+ record.data +"\}\}\'" };
+    }      
     return this.http.post(endpoint + cliscript , JSON.stringify(rec) , httpOptions).pipe(
       tap(_ => {
-        console.log(" Added record id=${record.name}");
+        console.log(operation );
 
       }),
-      catchError(this.handleError<any>('deleteProduct'))
+      catchError(this.handleError<any>('Record '+operation +' fail.'))
     );
   }
+
+
+  patchDG (id, records, dest, s1): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'target': dest
+      })
+    };
+
+    let rec= '{ "records": '+ JSON.stringify(records) + '}';
+
+    return this.http.patch(endpoint + elmnt + partition + id, rec , httpOptions)
+    .pipe(
+      timeout(10000),
+      map(this.extractData),
+      tap(_ => {
+        console.log('DG Patch success to '+id+' on'+dest );
+
+      }),
+      catchError((err: any) => {
+        //console.log(err);
+        return throwError(err);
+        })
+      );
+  }
+
+
+  exportToAS3 (keyword, dest ): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        //'Authorization': 'Basic '+s1,
+        'target': dest
+      })
+    };
+    let rec = {"command": "run", "utilCmdArgs": "-c 'tmsh run cli script tmpl_export -k " + keyword + "'"};
+    return this.http.post(endpoint + 'util/bash' , JSON.stringify(rec) , httpOptions).pipe(
+      tap((declar) => {
+        console.log(declar);
+
+      }),
+      catchError(this.handleError<any>('Export to AS3 with '+keyword+ ' From '))
+    );
+  }
+
 
   saveConfig () {
    let rec = { "command":"run" , "name":"/Common/add-rec", "utilCmdArgs": "save" };

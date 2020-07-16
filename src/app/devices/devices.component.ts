@@ -6,6 +6,8 @@ import { RestService } from '../rest.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataService } from "../data.service";
 import  MD5 from 'crypto-js/md5';
+import { switchMap } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 //import * as CryptoJS from 'crypto-js';
 
 
@@ -27,6 +29,9 @@ export class DevicesComponent implements OnInit {
 
 
   constructor(private route: ActivatedRoute, private router: Router, private data: DataService, public rest:RestService) { }
+
+
+  private subscription: Subscription;
 
   openDevPanel:boolean = false;
   results:any = {};
@@ -50,6 +55,8 @@ export class DevicesComponent implements OnInit {
 
   groupMaster:string ='';
   s1:string='';
+  tmshFormatRecs:string ='';
+  masterHash:string = '';
 
   title = 'Device List from local JSON file';
   gptitle = 'Data Group List'
@@ -252,7 +259,81 @@ export class DevicesComponent implements OnInit {
 
   }
 
-  masterMD5Hash(i) {
+  syncToMaster(i) {
+  	let dest=this.device_hostnames[this.dataGroups[i].master];
+  	if (dest!=undefined) {
+ 	  	this.subscription = this.rest.getGrpFromDevice(this.dataGroups[i].on_box_name, dest, this.s1).pipe(switchMap((group :any) => {
+ 	  		this.tmshFormatRecs = "\{";
+ 	  		var x:any = {};
+ 	  		//console.log(group.records);
+  			for ( x in group.records) {
+  				let y=group.records[x];
+  				this.tmshFormatRecs = this.tmshFormatRecs + " "+y.name + " \{ data '"+ y.data +"'\}";
+
+  			}
+  			this.masterHash = MD5(group.records.toString()).toString();
+  			return this.tmshFormatRecs = this.tmshFormatRecs+" \}";
+
+  		})).subscribe(
+  		() =>{
+    		//console.log('tmshFmt: ', this.tmshFormatRecs, this.masterHash );
+    		this.compareAndSync(i,true);
+    		this.subscription.unsubscribe();
+  		}
+
+  		);
+
+  	}
+
+  }
+
+  compareAndSync(i,sync) {
+  			// i is the UI template table line number that points to device who's records are being compared to subs.
+			this.not_inSync_with_master[i] = [];
+			this.match_with_master[i] = [];
+			this.noHostnameSub[i] = [];
+
+		  	//let hash = MD5(group.records.toString()).toString();
+		  	//let masterHash = this.masterHash;
+		  	let hash='';
+		  	let dest='';
+		  	console.log ('Master records MD5:', this.masterHash, this.dataGroups[i].master )
+
+	          for (var x in this.dataGroups[i].devices) {
+	                dest=this.device_hostnames[this.dataGroups[i].devices[x]];
+	                if (dest != undefined) {
+	                		let y=x;
+	                		let dest1=dest;
+			                this.rest.getGrpFromDevice(this.dataGroups[i].on_box_name, dest1, this.s1).subscribe((group :any) => {
+							  	hash = MD5(group.records.toString()).toString();
+							  	let match='';
+							  	if (hash===this.masterHash) {
+							  		match = 'Match with Master' ;
+							  		this.match_with_master[i].push(this.dataGroups[i].on_box_name);
+							  	} else {
+							  		match = 'Does **NOT** match Master';
+							  		this.not_inSync_with_master[i].push(this.dataGroups[i].on_box_name);
+							  		if (sync) {
+							  			// Sending formatted records to the device out of sycn
+							  			this.rest.patchDG(this.dataGroups[i].on_box_name, this.tmshFormatRecs, dest, "").subscribe((result) => {
+						                      console.log ('Device synched:', dest);
+							  			});
+							  		}
+							  	}
+							  	console.info ('Records MD5:', hash, this.dataGroups[i].devices[y] ,dest1, match, this.noHostnameSub[i].length, this.not_inSync_with_master[i].length, this.match_with_master[i].length, this.dataGroups[i].devices.length);
+			                }, (err) => {
+			                  console.log('Error while retrieving Subordinate group records:', this.dataGroups[i].on_box_name, dest1, err);
+			                  this.noHostnameSub[i].push(this.dataGroups[i].on_box_name);
+			                });
+			        } else {
+			        	console.error('Hostname not found for:' , this.dataGroups[i].devices[x]);
+						this.noHostnameSub[i].push(this.dataGroups[i].on_box_name);
+			        }
+	          }
+
+  }
+
+  masterMD5Hash(i, sync) {
 
   	let dest=this.device_hostnames[this.dataGroups[i].master];
   	if (dest!=undefined) {
@@ -260,6 +341,7 @@ export class DevicesComponent implements OnInit {
 			this.not_inSync_with_master[i] = [];
 			this.match_with_master[i] = [];
 			this.noHostnameSub[i] = [];
+			var masterRecords=group.records;
 
 		  	let hash = MD5(group.records.toString()).toString();
 		  	let masterHash = hash;
@@ -278,7 +360,18 @@ export class DevicesComponent implements OnInit {
 							  		this.match_with_master[i].push(this.dataGroups[i].on_box_name);
 							  	} else {
 							  		match = 'Does **NOT** match Master';
-							  		this.not_inSync_with_master[i].push(this.dataGroups[i].on_box_name);
+							  		if (sync) {
+							  			// Sending formatted records to the device out of sycn
+							  			this.rest.patchDG(this.dataGroups[i].on_box_name, masterRecords, dest1, "").subscribe((result) => {
+						                      console.log ('Device synched:', dest1);
+						                      this.match_with_master[i].push(this.dataGroups[i].on_box_name);
+							  			}
+							  			,(err) => {
+							  				this.not_inSync_with_master[i].push(this.dataGroups[i].on_box_name);
+							  			});
+							  		} else {
+							  			this.not_inSync_with_master[i].push(this.dataGroups[i].on_box_name);
+							  		}
 							  	}
 							  	console.info ('Records MD5:', hash, this.dataGroups[i].devices[y] ,dest1, match, this.noHostnameSub[i].length, this.not_inSync_with_master[i].length, this.match_with_master[i].length, this.dataGroups[i].devices.length);
 			                }, (err) => {
@@ -292,7 +385,8 @@ export class DevicesComponent implements OnInit {
 	          }
 
 	  	}, (err) => {
-	      console.log('Error Getting Master Rrecods for MD5:',dest, '-',this.dataGroups[i].on_box_name, err.error.message);
+	  		console.log(err);
+	      console.log('Error Getting Master Rrecods for MD5:',dest, '-',this.dataGroups[i].on_box_name);
 	    }
   		);
 	} else {

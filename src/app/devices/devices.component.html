@@ -85,31 +85,28 @@
     </div>
      
     <button *ngIf="(dataGroups[i].devices.length !=0)"  class="delete" title="Compare master to subs"
-      (click)="masterMD5Hash(i)">Compare Master to Subs</button>
+      (click)="masterMD5Hash(i, false)">Compare Master to Subs</button>
 
 
 
-    <button *ngIf="(device_hostnames[grp.master]==undefined)" class="message" style="background-color: red" title="All inSync"
+    <button *ngIf="(device_hostnames[grp.master]==undefined)" class="message" style="background-color: red" title="Check Hostname"
       > Master name not in hostname list </button>
       
 
 
-    <button *ngIf="(noHostnameSub[i] && noHostnameSub[i].length !=0)" class="message" style="background-color: red" title="All inSync"
+    <button *ngIf="(noHostnameSub[i] && noHostnameSub[i].length !=0)" class="message" style="background-color: red" title="Check alias to hostname mapping"
       >{{noHostnameSub[i].length}} subs with bad names</button>
       
 
 
-    <button *ngIf="(not_inSync_with_master[i] && not_inSync_with_master[i].length!=0)" class="message" style="background-color: red" title="inSync Check"
-      >{{not_inSync_with_master[i].length}} out of {{dataGroups[i].devices.length}} devices NOT IN SYNC with Master</button>
+    <button *ngIf="(not_inSync_with_master[i] && not_inSync_with_master[i].length!=0)" class="message" style="background-color: red" title="inSync Check" title="Click to Sync" (click)="masterMD5Hash(i,true)"
+      >{{not_inSync_with_master[i].length}} of {{dataGroups[i].devices.length}} NOT IN SYNC with Master</button>
        
+    <!-- masterMD5Hash(i -> is table row, true -> is sync or no sync) -->
 
-
-    <button *ngIf="(noHostnameSub[i] && match_with_master[i].length + noHostnameSub[i].length == dataGroups[i].devices.length)" class="message" style="background-color: lightgreen" title="All inSync"
-      >{{match_with_master[i].length}} out of {{dataGroups[i].devices.length}} devices IN SYNC with Master</button>
+    <button *ngIf="(noHostnameSub[i] && match_with_master[i].length + noHostnameSub[i].length == dataGroups[i].devices.length)" class="message" style="background-color: lightgreen" title="In Sync"
+      >{{match_with_master[i].length}} of {{dataGroups[i].devices.length}} IN SYNC with Master</button>
       
-
-
-
 
 
 

@@ -68,7 +68,7 @@ export class ProductComponent implements OnInit {
   }
 
   delete(name) {
-    this.rest.deleteDataGroup(name, this.device_name, this.s1)
+    this.rest.deleteDataGroup(name, this.device_hostnames[this.device_name], this.s1)
       .subscribe(res => {
           this.getGroupsFromDevice();
         }, (err) => {

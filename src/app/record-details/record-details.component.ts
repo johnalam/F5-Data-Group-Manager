@@ -49,7 +49,7 @@ export class RecordDetailsComponent implements OnInit {
   }
 
   update(op) {
-    this.rest.recordOps(this.operation, this.group, this.recordData).subscribe((result) => {
+    this.rest.recordOps(this.operation, this.group, this.recordData, "", "").subscribe((result) => {
       this.op_result = this.operation + ' OK';
       this.data.changeMessage("Updated running config only.");
       if (op=="repeat") {
