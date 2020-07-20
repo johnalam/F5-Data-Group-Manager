@@ -34,6 +34,7 @@ export class DevicesComponent implements OnInit {
 
   private subscription: Subscription;
 
+  admin:boolean = environment.admin;
   i:any=0;
   spin:boolean = false;
   openDevPanel:boolean = false;
@@ -66,6 +67,7 @@ export class DevicesComponent implements OnInit {
   gptitle = 'Data Group List'
   importFromFile:boolean = false;
 
+
   ngOnInit() {
   	  this.downloadDGList("datagroups.json");
 	  this.downloadDevicesList("devices.json");
@@ -82,6 +84,7 @@ export class DevicesComponent implements OnInit {
 	      this.groupname=this.results.name;
        }
        console.log('Admin2: ', environment.admin)
+
   }
 
   get_dgs(device_name, addr) {

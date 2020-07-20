@@ -1,35 +1,39 @@
+
+<div *ngIf="(admin)">
 <h2>Import Data Groups</h2>
+</div>
 
-<div>
-  <button mat-raised-button routerLink="/getgrpbyurl/">
-    Download Data group by URL
-  </button>&nbsp;&nbsp;&nbsp;&nbsp;
+    <div *ngIf="(admin)">
+      <button mat-raised-button routerLink="/getgrpbyurl/">
+        Download Data group by URL
+      </button>&nbsp;&nbsp;&nbsp;&nbsp;
 
-  <button mat-raised-button (click)="importFromFile=true;">
-    Import from local file
-  </button>&nbsp;&nbsp;&nbsp;&nbsp;
+      <button mat-raised-button (click)="importFromFile=true;">
+        Import from local file
+      </button>&nbsp;&nbsp;&nbsp;&nbsp;
 
-  <button mat-raised-button (click)="addGroup=true;" >
-    Create New Group
-  </button>&nbsp;&nbsp;&nbsp;&nbsp;
+      <button mat-raised-button (click)="addGroup=true;" >
+        Create New Group
+      </button>&nbsp;&nbsp;&nbsp;&nbsp;
 
-  <button *ngIf="(groupname!='')" mat-raised-button (click)="editCurrent()" >
-    Edit Current Group
-  </button>&nbsp;&nbsp;&nbsp;&nbsp;
+      <button *ngIf="(groupname!='')" mat-raised-button (click)="editCurrent()" >
+        Edit Current Group
+      </button>&nbsp;&nbsp;&nbsp;&nbsp;
 
-  <button mat-raised-button (click)="openDevicesPanel()" >
-    List Devices
-  </button>
-  <p>
+      <button mat-raised-button (click)="openDevicesPanel()" >
+        List Devices
+      </button>
+      <p>
 
-  <div *ngIf="(importFromFile)">
-    <label>File:
-        <input type="file" (change)="onChange($event.target.files)">
-    </label><br>
+      <div *ngIf="(importFromFile)">
+        <label>File:
+            <input type="file" (change)="onChange($event.target.files)">
+        </label><br>
 
-  <p>
-  </div>
+      <p>
+    </div>
 
+</div>
 
   <div *ngIf="(addGroup)">
     <label>Create new group on this client:</label><br>
@@ -72,6 +76,10 @@
       &nbsp;
 </div>
 
+
+
+
+<!-- end of admin div with datagroup buttons. --> 
 <div>
 
 <div class="spinner-wrapper" style="position: relative;">
