@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Title }     from '@angular/platform-browser';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -11,6 +12,7 @@ export class AppComponent {
   public constructor(private titleService: Title ) { }
 
   ngOnInit() {
+  	console.log('Admin:', environment.admin);
   	this.setTitle("F5 DG Manager");
   }
 

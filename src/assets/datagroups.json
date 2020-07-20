@@ -28,7 +28,8 @@
 		"type" : "string",
 		"master": "BigIP2",
 		"devices": [
-			"BigIP1"
+			"BigIP1",
+			"BigIP3"
 		]
 	},
 	{

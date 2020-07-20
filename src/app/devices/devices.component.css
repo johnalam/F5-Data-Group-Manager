@@ -107,3 +107,30 @@ button.message {
   top: -32px;
   color: black;
 }
+
+spinner {
+  position: relative;
+}
+
+.spinner-h2 {
+  margin: 10px;
+}
+
+.spinner-section {
+  display: flex;
+  align-content: center;
+  align-items: center;
+  height: 20px;
+  diameter: 30px;
+}
+
+.spinner-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.spinner-margin {
+  margin: 0 10px;
+}

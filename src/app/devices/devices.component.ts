@@ -8,6 +8,7 @@ import { DataService } from "../data.service";
 import  MD5 from 'crypto-js/md5';
 import { switchMap } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
+import { environment } from '../../environments/environment';
 //import * as CryptoJS from 'crypto-js';
 
 
@@ -33,6 +34,8 @@ export class DevicesComponent implements OnInit {
 
   private subscription: Subscription;
 
+  i:any=0;
+  spin:boolean = false;
   openDevPanel:boolean = false;
   results:any = {};
   // device_list is for presentiong choices.  It can be only the related devices or all the devices, depending on operation.
@@ -52,6 +55,7 @@ export class DevicesComponent implements OnInit {
   not_inSync_with_master:any = [];
   match_with_master:any = [];
   noHostnameSub:any = [];
+  noResponse:any = [];
 
   groupMaster:string ='';
   s1:string='';
@@ -77,6 +81,7 @@ export class DevicesComponent implements OnInit {
       if (typeof this.results.name != 'undefined') {
 	      this.groupname=this.results.name;
        }
+       console.log('Admin2: ', environment.admin)
   }
 
   get_dgs(device_name, addr) {
@@ -277,7 +282,7 @@ export class DevicesComponent implements OnInit {
   		})).subscribe(
   		() =>{
     		//console.log('tmshFmt: ', this.tmshFormatRecs, this.masterHash );
-    		this.compareAndSync(i,true);
+    		this.masterMD5Hash(i,true);
     		this.subscription.unsubscribe();
   		}
 
@@ -287,60 +292,17 @@ export class DevicesComponent implements OnInit {
 
   }
 
-  compareAndSync(i,sync) {
-  			// i is the UI template table line number that points to device who's records are being compared to subs.
-			this.not_inSync_with_master[i] = [];
-			this.match_with_master[i] = [];
-			this.noHostnameSub[i] = [];
-
-		  	//let hash = MD5(group.records.toString()).toString();
-		  	//let masterHash = this.masterHash;
-		  	let hash='';
-		  	let dest='';
-		  	console.log ('Master records MD5:', this.masterHash, this.dataGroups[i].master )
-
-	          for (var x in this.dataGroups[i].devices) {
-	                dest=this.device_hostnames[this.dataGroups[i].devices[x]];
-	                if (dest != undefined) {
-	                		let y=x;
-	                		let dest1=dest;
-			                this.rest.getGrpFromDevice(this.dataGroups[i].on_box_name, dest1, this.s1).subscribe((group :any) => {
-							  	hash = MD5(group.records.toString()).toString();
-							  	let match='';
-							  	if (hash===this.masterHash) {
-							  		match = 'Match with Master' ;
-							  		this.match_with_master[i].push(this.dataGroups[i].on_box_name);
-							  	} else {
-							  		match = 'Does **NOT** match Master';
-							  		this.not_inSync_with_master[i].push(this.dataGroups[i].on_box_name);
-							  		if (sync) {
-							  			// Sending formatted records to the device out of sycn
-							  			this.rest.patchDG(this.dataGroups[i].on_box_name, this.tmshFormatRecs, dest, "").subscribe((result) => {
-						                      console.log ('Device synched:', dest);
-							  			});
-							  		}
-							  	}
-							  	console.info ('Records MD5:', hash, this.dataGroups[i].devices[y] ,dest1, match, this.noHostnameSub[i].length, this.not_inSync_with_master[i].length, this.match_with_master[i].length, this.dataGroups[i].devices.length);
-			                }, (err) => {
-			                  console.log('Error while retrieving Subordinate group records:', this.dataGroups[i].on_box_name, dest1, err);
-			                  this.noHostnameSub[i].push(this.dataGroups[i].on_box_name);
-			                });
-			        } else {
-			        	console.error('Hostname not found for:' , this.dataGroups[i].devices[x]);
-						this.noHostnameSub[i].push(this.dataGroups[i].on_box_name);
-			        }
-	          }
-
-  }
 
   masterMD5Hash(i, sync) {
-
+  	this.spin=true;
   	let dest=this.device_hostnames[this.dataGroups[i].master];
+	this.noHostnameSub[i] = [];
+	this.noResponse[i] = [];
   	if (dest!=undefined) {
 	  	this.rest.getGrpFromDevice(this.dataGroups[i].on_box_name, dest, this.s1).subscribe((group :any) => {
 			this.not_inSync_with_master[i] = [];
 			this.match_with_master[i] = [];
-			this.noHostnameSub[i] = [];
+
 			var masterRecords=group.records;
 
 		  	let hash = MD5(group.records.toString()).toString();
@@ -352,6 +314,7 @@ export class DevicesComponent implements OnInit {
 	                if (dest != undefined) {
 	                		let y=x;
 	                		let dest1=dest;
+	                		this.spin=true;
 			                this.rest.getGrpFromDevice(this.dataGroups[i].on_box_name, dest1, this.s1).subscribe((group :any) => {
 							  	hash = MD5(group.records.toString()).toString();
 							  	let match='';
@@ -374,23 +337,36 @@ export class DevicesComponent implements OnInit {
 							  		}
 							  	}
 							  	console.info ('Records MD5:', hash, this.dataGroups[i].devices[y] ,dest1, match, this.noHostnameSub[i].length, this.not_inSync_with_master[i].length, this.match_with_master[i].length, this.dataGroups[i].devices.length);
+	        					if (this.noHostnameSub[i].length + this.not_inSync_with_master[i].length + this.match_with_master[i].length == this.dataGroups[i].devices.length) {
+	          						this.spin=false;
+	        					}							  	
 			                }, (err) => {
-			                  console.log('Error while retrieving Subordinate group records:', this.dataGroups[i].on_box_name, dest1, err);
-			                  this.noHostnameSub[i].push(this.dataGroups[i].on_box_name);
+								this.noHostnameSub[i].push(this.dataGroups[i].on_box_name);
+			                  	this.spin=false;
+			                  	console.log('Error while retrieving Subordinate group records:', this.dataGroups[i].on_box_name, dest1, err);
+			                  	console.info ('Spinner status:', this.noHostnameSub[i].length, this.not_inSync_with_master[i].length, this.match_with_master[i].length, this.dataGroups[i].devices.length);
 			                });
 			        } else {
 			        	console.error('Hostname not found for:' , this.dataGroups[i].devices[x]);
 						this.noHostnameSub[i].push(this.dataGroups[i].on_box_name);
 			        }
+	            }
+			  console.info ('Spinner status:', this.noHostnameSub[i].length, this.not_inSync_with_master[i].length, this.match_with_master[i].length, this.dataGroups[i].devices.length);
+
+	          if (this.noHostnameSub[i].length + this.not_inSync_with_master[i].length + this.match_with_master[i].length == this.dataGroups[i].devices.length) {
+	          	this.spin=false;
 	          }
 
 	  	}, (err) => {
 	  		console.log(err);
-	      console.log('Error Getting Master Rrecods for MD5:',dest, '-',this.dataGroups[i].on_box_name);
+	      	console.log('Error Getting Master Rrecods for MD5:',dest, '-',this.dataGroups[i].on_box_name);
+	      	this.noResponse[i].push(dest)
+	      	this.spin=false;
 	    }
   		);
 	} else {
 		console.error('Hostname not found for:' , this.dataGroups[i].master);
+		this.spin=false;
 	} 
   }
 

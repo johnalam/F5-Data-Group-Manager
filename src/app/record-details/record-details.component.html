@@ -11,7 +11,7 @@
  
   </div>
   <p>
-  <button (click)="update()">{{this.operation}}</button>
+  <button (click)="update(operation)">{{this.operation}}</button>
   &nbsp;
   <button *ngIf="(this.operation=='UPDATE')"    (click)="delete(group,recordData.name)">Delete</button>
   &nbsp;

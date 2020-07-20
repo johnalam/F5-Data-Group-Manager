@@ -72,9 +72,13 @@
       &nbsp;
 </div>
 
-
 <div>
-<h2>{{gptitle}}</h2>
+
+<div class="spinner-wrapper" style="position: relative;">
+  <h2>{{gptitle}}</h2>
+ <mat-spinner *ngIf="(spin && !(noHostnameSub[i] && noHostnameSub[i].length + not_inSync_with_master[i].length + match_with_master[i].length == dataGroups[i].devices.length))" 
+  diameter="35" ></mat-spinner>
+</div>
 
 <ul class="products">
   <li *ngFor="let grp of dataGroups; let i=index;">
@@ -97,6 +101,8 @@
     <button *ngIf="(noHostnameSub[i] && noHostnameSub[i].length !=0)" class="message" style="background-color: red" title="Check alias to hostname mapping"
       >{{noHostnameSub[i].length}} subs with bad names</button>
       
+    <button *ngIf="(noResponse[i] && noResponse[i].length != 0)" class="message" style="background-color: red" title="Check hostname or DNS mapping"
+      >No response from {{noResponse[i]}}</button>
 
 
     <button *ngIf="(not_inSync_with_master[i] && not_inSync_with_master[i].length!=0)" class="message" style="background-color: red" title="inSync Check" title="Click to Sync" (click)="masterMD5Hash(i,true)"
@@ -104,11 +110,9 @@
        
     <!-- masterMD5Hash(i -> is table row, true -> is sync or no sync) -->
 
-    <button *ngIf="(noHostnameSub[i] && match_with_master[i].length + noHostnameSub[i].length == dataGroups[i].devices.length)" class="message" style="background-color: lightgreen" title="In Sync"
+    <button *ngIf="(noHostnameSub[i] && match_with_master[i] && match_with_master[i].length + noHostnameSub[i].length == dataGroups[i].devices.length)" class="message" style="background-color: lightgreen" title="In Sync"
       >{{match_with_master[i].length}} of {{dataGroups[i].devices.length}} IN SYNC with Master</button>
       
-
-
 
     <button *ngIf="(group_missing_on_master[i])" class="delete" title="Add Group to master"
       (click)="addGrpToMaster(i)">Click to add starter group to master</button>
@@ -117,8 +121,7 @@
       >{{group_fetch_response[i]}}</button>
 
 
-
-    </li>
+    </li>    
 </ul>
 
 

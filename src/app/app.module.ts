@@ -12,7 +12,9 @@ import { ProductAddComponent } from './product-add/product-add.component';
 import { RecordsComponent } from './records/records.component';
 import { RecordDetailsComponent } from './record-details/record-details.component';
 import { MatFormFieldModule} from '@angular/material';
-import { MatTableModule } from '@angular/material' ;
+import {  MatTableModule, 
+          MatProgressSpinnerModule
+       } from '@angular/material' ;
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatInputModule} from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -95,7 +97,8 @@ const appRoutes: Routes = [
     MatSelectModule,
     MatToolbarModule,
     MatButtonModule,
-    BrowserAnimationsModule 
+    BrowserAnimationsModule,
+    MatProgressSpinnerModule 
   ],
   providers: [],
   bootstrap: [AppComponent]
