@@ -1,0 +1,65 @@
+[
+	{
+		"name" : "offices",
+		"on_box_name": "offices",
+		"type" : "string",
+		"master": "BigIP1",
+		"devices": [
+			"BigIP1",
+			"BigIP2",
+			"BigIP3",
+			"10.1.1.11"
+		]
+	},
+	{
+		"name" : "cloudflare-ranges",
+		"on_box_name": "cloudflare-ranges",
+		"type" : "string",
+		"master": "BigIP2.company.com",
+		"devices": [
+			"BigIP3",
+			"BigIP2",
+			"BigIP1"
+		]
+	},
+	{
+		"name" : "list2",
+		"on_box_name": "list2",
+		"type" : "string",
+		"master": "BigIP2",
+		"devices": [
+			"BigIP1",
+			"BigIP3"
+		]
+	},
+	{
+		"name" : "IP_WL",
+		"on_box_name": "IP_WL",
+		"type" : "IP",
+		"master": "BigIP2",
+		"devices": [
+			"BigIP2",
+			"BigIP1",
+			"BigIP3",
+			"BigIP2",
+			"BigIP1",
+			"BigIP3",
+			"BigIP2",
+			"BigIP1",
+			"BigIP3",
+			"BigIP2",
+			"BigIP1",
+			"BigIP3",
+			"BigIP2",
+			"BigIP1",
+			"BigIP3",
+			"BigIP2",
+			"BigIP1",
+			"BigIP3",
+			"BigIP2",
+			"BigIP1",
+			"BigIP3"
+
+		]
+	}
+]

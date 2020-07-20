@@ -1,0 +1,26 @@
+[
+  {
+    "name": "BigIP1",
+    "description": "",
+    "connections": [
+      "BigIP1.company.com",
+      "BigIP3.company.com"
+    ]
+  },
+  {
+    "name": "BigIP2",
+    "description": "",
+    "connections": [
+      "BigIP2.company.com:8443",
+      "BigIP4.company.com"
+    ]
+  },
+  {
+    "name": "BigIP3",
+    "description": "",
+    "connections": [
+      "BigIP3.company.com",
+      "BigIP2.company.com"
+    ]
+  }
+]
