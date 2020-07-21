@@ -13,6 +13,7 @@ import { Observable, of , throwError} from 'rxjs';
 import { map, catchError, tap, timeout } from 'rxjs/operators';
 
 import { DataService } from "../data.service";
+import { environment } from '../../environments/environment';
 
 export interface GroupData {
   id: string;
@@ -41,6 +42,7 @@ export class RecordsComponent implements OnInit {
 
   @Input() recordData:any = { index: 0, name: '', data: '' };
 
+  admin:boolean=environment.admin;
   group:any=[];
   save_results:string="Not Saved";  
 
