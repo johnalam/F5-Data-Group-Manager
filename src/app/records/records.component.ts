@@ -265,6 +265,7 @@ console.log('Recs:', this.currentDevice);
           }
       }
       this.dataSource = new MatTableDataSource(this.group.records);
+      this.dataSource.paginator = this.paginator;
   }
 
   /* 
