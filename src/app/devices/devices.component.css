@@ -80,6 +80,10 @@
   border-radius: 4px 0 0 4px;
 }
 
+.mine {
+  background-color: palegoldenrod;
+}
+
 button {
   background-color: #eee;
   border: none;
@@ -96,16 +100,20 @@ button:hover {
 
 button.delete {
   position: relative;
-  left: 675px;
-  top: -32px;
+  left: 665px;
+  top: -38px;
   background-color: gray !important;
   color: white;
+  font-size: 12px;
+  height: 24px;
 }
 button.message {
   position: relative;
   left: 675px;
-  top: -32px;
+  top: -38px;
   color: black;
+  font-size: 12px;
+  height: 24px;
 }
 
 spinner {

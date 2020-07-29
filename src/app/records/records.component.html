@@ -3,7 +3,7 @@
 <mat-toolbar color="primary">
   <mat-toolbar-row>
     <div class="button-row">
-      <button mat-raised-button (click)="recOps(0,group.name, '', '', 'ADD')"> Add Record </button>&nbsp;&nbsp;
+      <button mat-raised-button (click)="this.recOperation='Add';openDialog()"> Add Record </button>&nbsp;&nbsp;
       <span *ngIf="(grpSrc=='BigIP')"><button mat-raised-button (click)="inMemRecOps(0 ,'','','','save')"> SAVE </button>&nbsp;&nbsp;</span>
       <button mat-raised-button (click)="gotoDGList()"> Back to DG List</button>&nbsp;&nbsp;
       <button mat-raised-button *ngIf="(admin)" (click)="pushToOtherBigIPs()"> Push to Other Devices </button>&nbsp;&nbsp;
@@ -19,6 +19,7 @@
 <!-- 
 <div *ngIf="group" class="products"> 
 
+"recOps(0,group.name, '', '', 'ADD')"
  
    <div>
      <button (click)="add(group.name)">
@@ -85,12 +86,12 @@
 
 
 
-<div *ngIf="recOperation!=''">
+<div *ngIf="false && recOperation!=''">
   <h2>Big-IP Data-Group Record Add/Edit</h2>
   <div>
 
 <div *ngIf="(this.recOperation=='UPDATE')"><label>Record Name/Key:&nbsp;<input  [(ngModel)]="recordData.name" placeholder="Record Name" readonly="true" /> </label></div>
-      <div *ngIf="(this.recOperation!='UPDATE')"><label>Record Name/Key:&nbsp;<input  [(ngModel)]="recordData.name" placeholder="Record Name" /></label></div>
+<div *ngIf="(this.recOperation!='UPDATE')"><label>Record Name/Key:&nbsp;<input  [(ngModel)]="recordData.name" placeholder="Record Name" /></label></div>
 <!--
     <label>Record Name/Key:
       <input [(ngModel)]="recordData.name" placeholder="Record Name/Key" readonly="(recOperation=='UPDATE')" />
@@ -157,8 +158,29 @@
       <td mat-cell *matCellDef="let row"> {{row.data}} </td>
     </ng-container>
 
+    <!-- actions -->
+    <ng-container matColumnDef="actions">
+      <mat-header-cell *matHeaderCellDef>
+        <button mat-icon-button color="primary" (click)="recOps(0,group.name,'','','ADD');openDialog()">
+          <mat-icon aria-label="Example icon-button with a heart icon">add</mat-icon>
+        </button>
+      </mat-header-cell>
+
+      <mat-cell *matCellDef="let row; let i=index;">
+        <button mat-icon-button color="accent" (click)="recOps(i,group.name,row.name,row.data,'UPDATE');openDialog()">
+          <mat-icon aria-label="Edit">edit</mat-icon>
+        </button>
+
+        <button mat-icon-button color="accent" (click)="recOps(i,group.name,row.name,row.data,'DELETE');openDialog()">
+          <mat-icon aria-label="Delete">delete</mat-icon>
+        </button>
+      </mat-cell>
+    </ng-container>
+
+<!-- inMemRecOps(recordData.index, group.name, recordData.name, recordData.data , 'DELETE')  -->
+
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-     <tr mat-row *matRowDef="let i=index;let row; columns: displayedColumns; "(click)="recOps(i,group.name,row.name,row.data,'UPDATE')"
+     <tr mat-row *matRowDef="let i=index;let row; columns: displayedColumns; "(click)="recOps(i,group.name,row.name,row.data,'UPDATE');openDialog()"
     class="example-element-row">
     </tr>   
 <!--    <tr mat-row *matRowDef="let row; columns: displayedColumns; "(click)="onRowClicked(group.name,row.name,row.data)"
@@ -167,7 +189,8 @@
 
   </table>
  
-  <mat-paginator [pageSizeOptions]="[10, 25, 100]"></mat-paginator>
+  <mat-paginator [pageSizeOptions]="[10, 25, 100]" showFirstLastButtons></mat-paginator>
+  <!-- [pageIndex]="pIndex"  -->
 </div>
 
 

@@ -199,25 +199,6 @@ export class RestService {
   }
 
 
-  exportToAS3 (keyword, dest ): Observable<any> {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type':  'application/json',
-        //'Authorization': 'Basic '+s1,
-        'target': dest
-      })
-    };
-    let rec = {"command": "run", "utilCmdArgs": "-c 'tmsh run cli script tmpl_export -k " + keyword + "'"};
-    return this.http.post(endpoint + 'util/bash' , JSON.stringify(rec) , httpOptions).pipe(
-      tap((declar) => {
-        console.log(declar);
-
-      }),
-      catchError(this.handleError<any>('Export to AS3 with '+keyword+ ' From '))
-    );
-  }
-
-
   saveConfig () {
    let rec = { "command":"run" , "name":"/Common/add-rec", "utilCmdArgs": "save" };
     return this.http.post(endpoint + cliscript , JSON.stringify(rec) , httpOptions).pipe(
@@ -278,7 +259,23 @@ export class RestService {
         } ));
   }
 
+  exportToAS3 (keyword, dest ): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        //'Authorization': 'Basic '+s1,
+        'target': dest
+      })
+    };
+    let rec = {"command": "run", "utilCmdArgs": "-c 'tmsh run cli script tmpl_export -k " + keyword + "'"};
+    return this.http.post(endpoint + 'util/bash' , JSON.stringify(rec) , httpOptions).pipe(
+      tap((declar) => {
+        console.log(declar);
 
+      }),
+      catchError(this.handleError<any>('Export to AS3 with '+keyword+ ' From '))
+    );
+  }
 
 
   handleError<T> (operation = 'operation', result?: T) {

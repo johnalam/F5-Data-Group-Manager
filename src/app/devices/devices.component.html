@@ -47,6 +47,29 @@
   </div>
 
 
+<!-- below is AS3 export panel -->
+
+
+<div *ngIf="openExportPanel" class="mine">
+  <h2>Export Virtuals to AS3 Declaration from {{export_Device}}</h2>
+  <div>
+    <label>Enter Keyword or IP address: <input [(ngModel)]="export_keyword" placeholder="Found in virtual name, IP or, description or in pool name" size="50"      />
+    </label><br>
+    </div><p>
+  <button (click)="exportAppToAS3(export_keyword)">Fire-in-the-hole</button>&nbsp;&nbsp;&nbsp;&nbsp;
+  <button (click)="openExportPanel=false; openDevPanel=true">    Clear Panel   </button><p>
+
+<label *ngIf="declar!=''"> Declaration for Keyword: {{ export_keyword }}:<p>
+      <textarea rows="20" cols="100" name="Declaration" [(ngModel)]="declar"></textarea>
+    <button >    Push to Big-IP   </button>
+</label>
+
+</div>
+
+
+<!-- below is Big-IP devices panel -->
+
+
 <div *ngIf="openDevPanel">
 <h2>{{title}}</h2>
 
@@ -61,8 +84,16 @@
       (click)="get_dgs(device.name, device.address)">Get DGs</button>
       &nbsp;
 
-        <button class="delete" title="Upload Scripts" (click)="upload_scripts(i, device.address)">Upload DG Scripts</button>
+      <button class="delete" title="Upload DG Scripts" (click)="upload_scripts(i, device.address)">Upload DG Scripts</button>
       &nbsp;<button class="message" *ngIf="(device_list[i].scriptUploadStatus!=undefined)">{{device_list[i].scriptUploadStatus}}</button>
+
+     <button class="delete" title="Export Application to AS3"
+      (click)="exportPanel(device.name, device.address)">Mine AS3 Declarations</button>
+      &nbsp;
+
+      <button class="delete" title="Upload Export Script"
+      (click)="upload_scripts(i, device.address, 'AS3Export')">Upload Export Script</button>
+      &nbsp;
 
     </div>
   </li>

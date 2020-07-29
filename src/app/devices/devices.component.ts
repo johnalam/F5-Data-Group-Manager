@@ -34,6 +34,12 @@ export class DevicesComponent implements OnInit {
 
   private subscription: Subscription;
 
+  openExportPanel:boolean = false;
+  export_Device:string='';
+  export_Address:string='';
+  declar:string = ''
+
+
   admin:boolean = environment.admin;
   i:any=0;
   spin:boolean = false;
@@ -147,6 +153,21 @@ export class DevicesComponent implements OnInit {
   	//this.downloadDevicesList('devices.json');
   }
 
+  exportPanel(devname, devaddr) {
+    var keyword='';
+    this.openDevPanel=false;
+    this.openExportPanel=true;
+    this.export_Device=devname;
+    this.export_Address=devaddr;
+  }
+
+  exportAppToAS3(keyword) {
+      this.rest.exportToAS3(keyword, this.export_Address).subscribe((result) => {
+        this.declar=result.commandResult;
+      }, (err) => { 
+        this.declar=err;
+      });
+  }
 
   records(i) {
 	if (this.device_hostnames[this.dataGroups[i].master]==undefined) {

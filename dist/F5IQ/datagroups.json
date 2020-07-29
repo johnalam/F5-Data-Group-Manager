@@ -5,10 +5,7 @@
 		"type" : "string",
 		"master": "BigIP1",
 		"devices": [
-			"BigIP1",
-			"BigIP2",
-			"BigIP3",
-			"10.1.1.11"
+			"BigIP2"
 		]
 	},
 	{

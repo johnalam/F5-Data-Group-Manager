@@ -1,12 +1,12 @@
-import { Component, ViewEncapsulation, OnInit , Input} from '@angular/core';
+import { Component, ViewEncapsulation, OnInit , Input, Inject } from '@angular/core';
 import { RestService } from '../rest.service';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import {ViewChild} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {MatTableDataSource} from '@angular/material/table';
-
+import {MatTableDataSource, MatTable} from '@angular/material/table';
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of , throwError} from 'rxjs';
@@ -22,6 +22,12 @@ export interface GroupData {
 
 
 }
+export interface DialogData {
+  name: string;
+  data: string;
+  op: string
+}
+
 export interface DGPushStatus {
     dest: string;
     label: string;
@@ -41,23 +47,25 @@ export interface DGPushStatus {
 export class RecordsComponent implements OnInit {
 
   @Input() recordData:any = { index: 0, name: '', data: '' };
+  @ViewChild('Table') Table: MatTable<any>;
 
   admin:boolean=environment.admin;
   group:any=[];
   save_results:string="Not Saved";  
 
-  displayedColumns: string[] = [ 'name', 'data'];
+  displayedColumns: string[] = [ 'name', 'data', 'actions'];
   dataSource: MatTableDataSource<GroupData>;
 
   statusDisplayedColumns = [ 'dest', 'status'];
   dgPushStatus :DGPushStatus[] = [] ;
   pushStatusDataSource: DGPushStatus[] ;
+  pIndex:any = 0;
 
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   
 
-  constructor(private http: HttpClient , public rest:RestService, private route: ActivatedRoute, private router: Router, private data: DataService) { }
+  constructor(public dialog: MatDialog , private http: HttpClient , public rest:RestService, private route: ActivatedRoute, private router: Router, private data: DataService) { }
 
   results:any = {};
   deviceList:any = {};
@@ -77,6 +85,7 @@ export class RecordsComponent implements OnInit {
   device_hostnames:any=[];
   currentDevice:any={};
   s1:any='';
+  public openRecDialog:boolean=false;
 
   
 
@@ -107,8 +116,6 @@ export class RecordsComponent implements OnInit {
     this.masterAddress = this.currentDevice.master;
 
     //this.data.devAddress.subscribe(destAddress => this.destAddress = destAddress );
-console.log('Recs:', this.currentDevice);
-
 
     if (Object.getOwnPropertyNames(this.results).length === 0 ) {
           //|| this.grpSrc == 'BigIP'
@@ -156,6 +163,7 @@ console.log('Recs:', this.currentDevice);
   	  this.dataSource = new MatTableDataSource(data.records);
    	  this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
+      //this.dataSource.paginator.firstPage();
 
       //console.log('***',this.group);
     }, (err) => {
@@ -200,7 +208,8 @@ console.log('Recs:', this.currentDevice);
                           this.data.changeMessage("Saved to Permanent Config") ;
                       } else {
                           this.data.changeMessage("Updated Running config only");
-                          this.getRecords();
+                          //this.getRecords();
+                          this.updateTable(key, value, index, op);
                       }
 
                       for (var x in this.relatedDevices) {
@@ -212,7 +221,7 @@ console.log('Recs:', this.currentDevice);
                                 this.recordOps(op, groupname, this.recordData, dest).subscribe((result) => {
                                   console.log ('Subordinate Device updated:', dest);
                                 }, (err) => {
-                                  console.log(err);
+                                  console.error('Subordinate Device error: ', dest, err);
                                   this.dgPushStatus.push({ dest: dest, label: this.relatedDevices[x] , group: groupname, status: err, operation: op});
                                   this.data.changeMessage(err);
                                 });
@@ -220,13 +229,19 @@ console.log('Recs:', this.currentDevice);
                       }
 
                       if (op=="REPEAT") {
-                          this.recordData.name =  "";
-                          this.recOperation='add';
+                          this.recOperation='ADD';
+                          this.recOps(0,this.group.name,'','','ADD');
+                          this.openDialog();
+
                       } else {
                           this.recOperation="";
                       }
 
-
+                      if (op=='ADD') {
+                        this.pIndex= Math.ceil(this.paginator.length / this.paginator.pageSize) - 1  ;
+                        //this.getRecords();
+                        console.log(" Page: ", op, this.paginator.pageSize,this.paginator.length, this.pIndex, this.paginator, this.sort);
+                      }
                   }, (err) => {
                       this.dgPushStatus.push({ dest: dest, label: this.masterAddress , group: groupname, status: op+' Failed on Master, Aborting.', operation: op});
                       this.pushStatusDataSource = [...this.dgPushStatus];
@@ -247,26 +262,51 @@ console.log('Recs:', this.currentDevice);
           }
 
       } else {
+          this.updateTable(key, value, index, op);
 
-          if (op=='add' || op=='REPEAT') {
-              this.group.records.push({"name":key, "data":value})
-              console.log(this.group);
-              if (op=='REPEAT') {
-                this.recordData.name='';
-                this.recordData.data='';
-                this.recOperation=op;
-              }
-          } else if (op=='UPDATE') {
-              this.group.records[index].data=value;
-              console.log('Added record:', this.group[index]);
-          } else if (op== 'DELETE') {
-              this.group.records.splice(index, index);
-              console.log('Deleted Record:', this.group[index]);
-          }
       }
       this.dataSource = new MatTableDataSource(this.group.records);
       this.dataSource.paginator = this.paginator;
+
+      //console.log(RecordsComponent);
+    /*if (this.dataSource._filterChange.getValue() === '') {
+        this.dataSource.filter = ' ';
+        this.dataSource.filter = '';
+    } else { */
+        // if there's something, we make a simple change and then put back old value
+        //this.dataSource.filter = '';
+        //this.dataSource.filter = this.filter.nativeElement.value;
+    //} 
   }
+
+
+updateTable(key, value, index, op) {
+
+          if (op=='ADD' || op=='REPEAT') {
+              this.group.records.push({"name":key, "data":value})
+              console.log('Adding record:', key, value, this.group.records.indexOf(key));
+              //this.dataSource.paginator.nextPage();
+
+          } else if (op=='UPDATE') {
+              this.group.records[index].data=value;
+              console.log('Updated record:', this.group.records[index], key, value);
+          } else if (op== 'DELETE') {
+              console.log('Deleted Record:', this.group.records[index], key, value);
+              this.group.records.splice(index, 1);
+          }
+          this.dataSource = new MatTableDataSource(this.group.records);
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+          //this.dataSource.paginator._changePageSize(this.paginator.pageSize); 
+          //this.dataSource.renderRows();
+
+          console.log('datasource1 :', this.group.records);
+          console.log('Adding record after sort:', key, value, this.group.records.indexOf(key));
+
+}
+
+
+
 
   /* 
   recordUpdate(index ,groupname, key, value, op, dest ) {
@@ -506,4 +546,72 @@ console.log('Recs:', this.currentDevice);
     }
   }
 
+
+  openDialog(): void {
+
+    console.log('Dialog open status', this.openRecDialog);
+    if (this.openRecDialog) {
+      return;
+    }
+    const dialogRef = this.dialog.open(recordDataDialog, {
+        width: '450px',
+        data: {name: this.recordData.name, data: this.recordData.data, op: this.recOperation}
+    });
+
+    this.openRecDialog=true;
+
+    dialogRef.afterClosed().subscribe(result => {
+
+        console.log('result data:', result.event,result.data, this.recOperation, this.group.name, this.recordData.index);
+
+        this.recordData.name = result.data.name;
+        this.recordData.data = result.data.data;
+        this.openRecDialog=false;
+
+        if ( result.event!='cancel' ) {
+          this.inMemRecOps(this.recordData.index, this.group.name , this.recordData.name, this.recordData.data, result.data.op)
+        }
+
+
+    });
+
+
+
+
+  }
+
+
+
 }
+
+
+
+@Component({
+  selector: 'recordAddEditDataDialog',
+  templateUrl: 'record-add-edit.dialog.html',
+})
+export class recordDataDialog {
+
+  op:string = '';
+  
+
+  constructor(
+    public dialogRef: MatDialogRef<recordDataDialog>,
+    @Inject(MAT_DIALOG_DATA) public data: DialogData) {
+      //console.log('dialog data:' , data);
+      //this.local_data = {...data};
+      //this.action = this.local_data.action;
+    }
+
+  onNoClick(): void {
+    this.dialogRef.close({event: 'cancel', data: this.data});
+  }
+
+  sendOperation(op) {
+    this.dialogRef.close({event: op, data: this.data})
+  }
+
+}
+
+
+

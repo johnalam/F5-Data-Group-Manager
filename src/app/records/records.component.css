@@ -128,6 +128,14 @@ td.mat-column-star {
   padding-right: 8px;
 }
 
+.mat-column-name {
+  width: 40%;
+}
+
+.mat-column-data {
+  width: 40%;
+}
+
 th.mat-column-position, td.mat-column-position {
   padding-left: 8px;
 }
