@@ -62,13 +62,13 @@ const appRoutes: Routes = [
     data: { title: 'Record Add/Edit' }
   },
   {
-    path: 'devices',
+    path: 'devices/:id',
     component: DevicesComponent,
     data: { title: 'Device List' }
   },
   { 
     path: '',
-    redirectTo: '/devices',
+    redirectTo: '/devices/dg',
     pathMatch: 'full'
   },
   { 

@@ -86,7 +86,7 @@ export class RecordsComponent implements OnInit {
   currentDevice:any={};
   s1:any='';
   public openRecDialog:boolean=false;
-
+  referrer_page:string = "";
   
 
 
@@ -123,6 +123,7 @@ export class RecordsComponent implements OnInit {
     	this.getRecords();
       this.grpSrc = 'BigIP';
       this.data.setGrpSource(this.grpSrc);
+      this.referrer_page = 'dev';
 
     } else {
       this.data.setGrpSource(this.grpSrc);
@@ -133,6 +134,7 @@ export class RecordsComponent implements OnInit {
       this.dataSource = new MatTableDataSource(this.results.records);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
+      this.referrer_page = 'dg';
     }
 
     this.data.currentMessage.subscribe(save_results => this.save_results = save_results)
@@ -403,7 +405,7 @@ updateTable(key, value, index, op) {
     if (this.grpSrc == 'BigIP' && this.save_results != 'Saved to Permanent Config') {
       this.inMemRecOps(0 ,'','','','save');
     }
-    this.router.navigate(['/devices']);
+    this.router.navigate(['/devices/'+this.referrer_page]);
   }
 
  /* 
@@ -423,11 +425,11 @@ updateTable(key, value, index, op) {
       
 
 
-      if (this.grpSrc == 'BigIP' && this.save_results != 'Saved to Permanent Config') {
+      //if (this.grpSrc == 'BigIP' && this.save_results != 'Saved to Permanent Config') {
 
-        this.deviceSelect = this.deviceList;
-        console.log('lists:', this.deviceList, Object.keys(this.deviceList));
-      } else {
+        //this.deviceSelect = this.deviceList;
+        //console.log('lists:', this.deviceList, Object.keys(this.deviceList));
+      //} else {
         this.deviceList=this.device_hostnames;
 
           for (var x in Object.keys(this.deviceList)) {
@@ -438,7 +440,7 @@ updateTable(key, value, index, op) {
                //this.deviceMap[dev.address] = dev.name;
             //}
           }
-      }
+      //}
       this.deviceSlct=true;
   }
 
@@ -463,9 +465,11 @@ updateTable(key, value, index, op) {
         //console.log('Start Push', this.selected[dev], dest);
         if (dest!=undefined) {
             this.addGroup(this.group, dest).subscribe((result) => {
-                  console.log('returned Group .');
+                  this.dgPushStatus.push({ dest: this.selected[dev], label: this.selected[dev], group: '', status: 'Data-group Pushed Successfully', operation: 'add group'});
+                  console.log('Data-Group added.');
                 }, (err) => {
-                  console.log(err);
+                  this.dgPushStatus.push({ dest: this.selected[dev], label: this.selected[dev], group: '', status: err, operation: 'add group'});
+                  console.log('->', err);
                 });
 
         } else {
@@ -503,7 +507,7 @@ updateTable(key, value, index, op) {
 
         console.log("Added OK:  group: ", group.name , 'to:', dest, 'Array length:', this.pushStatusDataSource.length, this.pushStatusDataSource[this.pushStatusDataSource.length - 1 ]) ;
       }),
-      catchError(this.handleError<any>('Push to Big-IPs', group.name, dest))
+      catchError(this.handleError<any>('Failed Push to Big-IPs', group.name, dest))
     );
   }
 
@@ -513,7 +517,7 @@ updateTable(key, value, index, op) {
 
 
       // TODO: send the error to remote logging infrastructure
-      //console.error(error.error.message); // log to console instead
+      console.error(error.error.message); // log to console instead
       
       // TODO: better job of transforming error for user consumption
       //console.log(dest, `${operation} failed: ${error.message}`);
@@ -527,7 +531,12 @@ updateTable(key, value, index, op) {
         return throwError(error);
       }
 
-      this.dgPushStatus.push({ dest: dest, label: this.deviceMap[dest], group: group, status: operation, operation: operation});
+      if ( error.error.message !== undefined ) {
+        this.dgPushStatus.push({ dest: dest, label: this.deviceMap[dest], group: group, status: error.error.message, operation: operation});
+      } else {
+        this.dgPushStatus.push({ dest: dest, label: this.deviceMap[dest], group: group, status: operation, operation: operation});
+      }
+
       this.pushStatusDataSource = [...this.dgPushStatus];
 
       // Let the app keep running by returning an empty result.

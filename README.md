@@ -7,9 +7,13 @@ Manage iRule data-groups from a central location.
 
 Requirements:
 
-	1- dg-app-dist.zip file from this depository.
+	1- Content of dist-user or dist/F5IQ file from this depository.
 
-	    *Expand this file in the nginx root html directory.  /usr/share/nginx/html
+	    *dist/F5IQ is the full version.  It includes Big-IP device management.  Allow upload of scripts to Big-IP.  Also allows managing data-group on each Big-IP.  Also allows exporting Virtual server configuration to F5 AS3 declarations.  This version is to be used by admins.
+
+	    *dist-user lacks the device management.  To be used by a user.  Only allows editing the data-groups.
+
+	    *copy these files to the nginx root html directory.  /usr/share/nginx/html
 
 	2- NGINX web server and reverse proxy.  
 
@@ -33,8 +37,6 @@ Requirements:
 			proxy_set_header Authorization 'Basic YWRtaW46YWRtaW4=';
 
 
-
-
 Nginx acts as both a webserver and a reverse proxy for this app.  The default.conf file has commands to:
 
 	1- Serve from local files anything with URI "/".
@@ -50,7 +52,8 @@ Only internal data-groups are handled initially.
 
 In order to add/edit/delete one record at a time, this app relies on a BigIP TMSH CLI script.  The script is 'RUN' or executed via a REST API request.  The operation (add, edit, delete) is passed along to the script along with the data in the API request POST body.  This is equivalent to running the script from the TMSH CLI.  The name of the script is "add-rec" initially.
 
-The script must be uploaded to the BigIPs.  The App provides a way to upload the script to one device at a time via a single click.  Open the "List Devices" panel to see the Button.
+The script must be uploaded to the BigIPs.  The App provides a way to upload the script to one device at a time via a single click.  Open the "Devices Management" panel to list the Big-IP devices and see the "Upload DG Script" Buttons, one for each row or each device.
+
 	* NOTE: you need to save the config for the script upload to survive a BigIP reboot.  For now, the only way to save config from the App is in the data-group editing screen.
 
 There are two versions of the script under assets directory:

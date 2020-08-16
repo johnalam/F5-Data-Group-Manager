@@ -1,37 +1,18 @@
 
 <div *ngIf="(admin)">
-<h2>Import Data Groups</h2>
+<h2>Big-IP Manager</h2>
 </div>
 
     <div *ngIf="(admin)">
-      <button mat-raised-button routerLink="/getgrpbyurl/">
-        Download Data group by URL
-      </button>&nbsp;&nbsp;&nbsp;&nbsp;
+      <button *ngIf="(openDevPanel)" mat-raised-button (click)="openDevPanel=false;" >
+        Manage Data Groups
+      </button>
 
-      <button mat-raised-button (click)="importFromFile=true;">
-        Import from local file
-      </button>&nbsp;&nbsp;&nbsp;&nbsp;
-
-      <button mat-raised-button (click)="addGroup=true;" >
-        Create New Group
-      </button>&nbsp;&nbsp;&nbsp;&nbsp;
-
-      <button *ngIf="(groupname!='')" mat-raised-button (click)="editCurrent()" >
-        Edit Current Group
-      </button>&nbsp;&nbsp;&nbsp;&nbsp;
-
-      <button mat-raised-button (click)="openDevicesPanel()" >
-        List Devices
+      <button *ngIf="(!openDevPanel)" mat-raised-button (click)="openDevicesPanel()" >
+        Manage Big-IP Devices
       </button>
       <p>
 
-      <div *ngIf="(importFromFile)">
-        <label>File:
-            <input type="file" (change)="onChange($event.target.files)">
-        </label><br>
-
-      <p>
-    </div>
 
 </div>
 
@@ -111,9 +92,37 @@
 
 
 <!-- end of admin div with datagroup buttons. --> 
-<div>
+<div *ngIf="!openDevPanel">
 
-<div class="spinner-wrapper" style="position: relative;">
+    <div *ngIf="(admin)">
+      <button mat-raised-button routerLink="/getgrpbyurl/" >
+        Download Data group by URL
+      </button>&nbsp;&nbsp;&nbsp;&nbsp;
+
+      <button mat-raised-button (click)="importFromFile=true;" >
+        Import from local file
+      </button>&nbsp;&nbsp;&nbsp;&nbsp;
+
+      <button mat-raised-button (click)="addGroup=true;" >
+        Create New Group
+      </button>&nbsp;&nbsp;&nbsp;&nbsp;
+
+      <button *ngIf="(groupname!='')" mat-raised-button (click)="editCurrent()" >
+        Edit Current Group
+      </button>
+
+      <p>
+
+      <div *ngIf="(importFromFile)">
+        <label>File:
+            <input type="file" (change)="onChange($event.target.files)">
+        </label><br>
+
+      <p>
+    </div>
+
+
+<div  class="spinner-wrapper" style="position: relative;">
   <h2>{{gptitle}}</h2>
  <mat-spinner *ngIf="(spin && !(noHostnameSub[i] && noHostnameSub[i].length + not_inSync_with_master[i].length + match_with_master[i].length == dataGroups[i].devices.length))" 
   diameter="35" ></mat-spinner>
@@ -123,17 +132,17 @@
   <li *ngFor="let grp of dataGroups; let i=index;">
     <div (click)="records(i)">
       <span class="badge">{{i+1}}</span> <span style="  display: inline-block; width:200px">{{grp.name}}</span> &nbsp;
-      <span class="type">Master</span><span style="  display: inline-block; width:260px">{{grp.master}}</span>
+      <span class="type">Primary</span><span style="  display: inline-block; width:255px">{{grp.master}}</span>
       <span class="type">Subs</span><span style="  display: inline-block; width:20px">{{dataGroups[i].devices.length}}</span>
     </div>
      
-    <button *ngIf="(dataGroups[i].devices.length !=0)"  class="delete" title="Compare master to subs"
-      (click)="masterMD5Hash(i, false)">Compare Master to Subs</button>
+    <button *ngIf="(dataGroups[i].devices.length !=0)"  class="delete" title="Compare Primary to subs"
+      (click)="primaryMD5Hash(i, false)">Compare Primary to Subs</button>
 
 
 
     <button *ngIf="(device_hostnames[grp.master]==undefined)" class="message" style="background-color: red" title="Check Hostname"
-      > Master name not in hostname list </button>
+      > Primary name not in hostname list </button>
       
 
 
@@ -144,17 +153,17 @@
       >No response from {{noResponse[i]}}</button>
 
 
-    <button *ngIf="(not_inSync_with_master[i] && not_inSync_with_master[i].length!=0)" class="message" style="background-color: red" title="inSync Check" title="Click to Sync" (click)="masterMD5Hash(i,true)"
-      >{{not_inSync_with_master[i].length}} of {{dataGroups[i].devices.length}} NOT IN SYNC with Master</button>
+    <button *ngIf="(not_inSync_with_master[i] && not_inSync_with_master[i].length!=0)" class="message" style="background-color: red" title="inSync Check" title="Click to Sync" (click)="primaryMD5Hash(i,true)"
+      >{{not_inSync_with_master[i].length}} of {{dataGroups[i].devices.length}} NOT IN SYNC with Primary</button>
        
-    <!-- masterMD5Hash(i -> is table row, true -> is sync or no sync) -->
+    <!-- primaryMD5Hash(i -> is table row, true -> is sync or no sync) -->
 
     <button *ngIf="(noHostnameSub[i] && match_with_master[i] && match_with_master[i].length + noHostnameSub[i].length == dataGroups[i].devices.length)" class="message" style="background-color: lightgreen" title="In Sync"
-      >{{match_with_master[i].length}} of {{dataGroups[i].devices.length}} IN SYNC with Master</button>
+      >{{match_with_master[i].length}} of {{dataGroups[i].devices.length}} IN SYNC with Primary</button>
       
 
-    <button *ngIf="(group_missing_on_master[i])" class="delete" title="Add Group to master"
-      (click)="addGrpToMaster(i)">Click to add starter group to master</button>
+    <button *ngIf="(group_missing_on_master[i])" class="delete" title="Add Group to Primary"
+      (click)="addGrpToMaster(i)">Click to add starter group to Primary</button>
       
     <button *ngIf="(group_fetch_response[i])" class="message" style="background-color: red" title="Group fetch response"
       >{{group_fetch_response[i]}}</button>

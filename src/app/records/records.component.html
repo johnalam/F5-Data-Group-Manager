@@ -3,10 +3,10 @@
 <mat-toolbar color="primary">
   <mat-toolbar-row>
     <div class="button-row">
-      <button mat-raised-button (click)="this.recOperation='Add';openDialog()"> Add Record </button>&nbsp;&nbsp;
-      <span *ngIf="(grpSrc=='BigIP')"><button mat-raised-button (click)="inMemRecOps(0 ,'','','','save')"> SAVE </button>&nbsp;&nbsp;</span>
-      <button mat-raised-button (click)="gotoDGList()"> Back to DG List</button>&nbsp;&nbsp;
-      <button mat-raised-button *ngIf="(admin)" (click)="pushToOtherBigIPs()"> Push to Other Devices </button>&nbsp;&nbsp;
+      <!-- <button mat-raised-button (click)="this.recOperation='Add';openDialog()"> Add Record </button>&nbsp;&nbsp; -->
+      <button mat-raised-button (click)="gotoDGList()"> Back </button>&nbsp;&nbsp;
+      <span *ngIf="(grpSrc=='BigIP')"><button mat-raised-button (click)="inMemRecOps(0 ,'','','','save')"> Save Changes </button>&nbsp;&nbsp;</span>
+      <button mat-raised-button *ngIf="(admin)" (click)="pushToOtherBigIPs()"> Push this DG to a Big-IP </button>&nbsp;&nbsp;
       <span style="color: yellow">{{ save_results }}</span>&nbsp;&nbsp;
       <span>Source: </span>&nbsp;<span style="color: orange">{{ grpSrc }}</span>&nbsp;&nbsp;
 

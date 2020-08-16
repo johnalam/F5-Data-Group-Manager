@@ -34,6 +34,10 @@ export class DevicesComponent implements OnInit {
 
   private subscription: Subscription;
 
+
+  openDevPanel:boolean = false;
+
+  openDGPanel:boolean = true;
   openExportPanel:boolean = false;
   export_Device:string='';
   export_Address:string='';
@@ -43,7 +47,7 @@ export class DevicesComponent implements OnInit {
   admin:boolean = environment.admin;
   i:any=0;
   spin:boolean = false;
-  openDevPanel:boolean = false;
+
   results:any = {};
   // device_list is for presentiong choices.  It can be only the related devices or all the devices, depending on operation.
   device_list: any = [];
@@ -58,7 +62,7 @@ export class DevicesComponent implements OnInit {
   group_fetch_response:any = [];
   relatedDevices:any = [];
 
-  // The following three varialbles are used for MD5 hash matchin of subs and master copies.
+  // The following three varialbles are used for MD5 hash matchin of subs and Primary copies.
   not_inSync_with_master:any = [];
   match_with_master:any = [];
   noHostnameSub:any = [];
@@ -90,7 +94,9 @@ export class DevicesComponent implements OnInit {
 	      this.groupname=this.results.name;
        }
        console.log('Admin2: ', environment.admin)
-
+       if (this.route.snapshot.params['id']==='dev') {
+       		this.openDevPanel = true;
+       	}
   }
 
   get_dgs(device_name, addr) {
@@ -150,6 +156,7 @@ export class DevicesComponent implements OnInit {
 
   openDevicesPanel() {
   	this.openDevPanel=!this.openDevPanel;
+ 	this.openDGPanel=!this.openDevPanel;
   	//this.downloadDevicesList('devices.json');
   }
 
@@ -188,7 +195,7 @@ export class DevicesComponent implements OnInit {
       //console.log('***',this.group);
     }, (err) => {
 	    	if (err=='TimeoutError: Timeout has occurred') {
-	    	  	this.group_fetch_response[i]='No response from Master, possible network issues.';
+	    	  	this.group_fetch_response[i]='No response from Primary, possible network issues.';
 	    	} else if ( err=="TypeError: Cannot read property 'length' of undefined") {
 				this.group_fetch_response[i]='Check device to hostname mapping in devices file.';
 	    	} else {
@@ -288,7 +295,7 @@ export class DevicesComponent implements OnInit {
 
   }
 
-  syncToMaster(i) {
+  /*syncToPrimary(i) {
   	let dest=this.device_hostnames[this.dataGroups[i].master];
   	if (dest!=undefined) {
  	  	this.subscription = this.rest.getGrpFromDevice(this.dataGroups[i].on_box_name, dest, this.s1).pipe(switchMap((group :any) => {
@@ -306,7 +313,7 @@ export class DevicesComponent implements OnInit {
   		})).subscribe(
   		() =>{
     		//console.log('tmshFmt: ', this.tmshFormatRecs, this.masterHash );
-    		this.masterMD5Hash(i,true);
+    		this.primaryMD5Hash(i,true);
     		this.subscription.unsubscribe();
   		}
 
@@ -314,10 +321,10 @@ export class DevicesComponent implements OnInit {
 
   	}
 
-  }
+  }*/
 
 
-  masterMD5Hash(i, sync) {
+  primaryMD5Hash(i, sync) {
   	this.spin=true;
   	let dest=this.device_hostnames[this.dataGroups[i].master];
 	this.noHostnameSub[i] = [];
@@ -331,7 +338,7 @@ export class DevicesComponent implements OnInit {
 
 		  	let hash = MD5(group.records.toString()).toString();
 		  	let masterHash = hash;
-		  	console.log ('Master records MD5:', masterHash, this.dataGroups[i].master )
+		  	console.log ('Primary records MD5:', masterHash, this.dataGroups[i].master )
 
 	          for (var x in this.dataGroups[i].devices) {
 	                dest=this.device_hostnames[this.dataGroups[i].devices[x]];
@@ -343,10 +350,10 @@ export class DevicesComponent implements OnInit {
 							  	hash = MD5(group.records.toString()).toString();
 							  	let match='';
 							  	if (hash===masterHash) {
-							  		match = 'Match with Master' ;
+							  		match = 'Match with Primary' ;
 							  		this.match_with_master[i].push(this.dataGroups[i].on_box_name);
 							  	} else {
-							  		match = 'Does **NOT** match Master';
+							  		match = 'Does **NOT** match Primary';
 							  		if (sync) {
 							  			// Sending formatted records to the device out of sycn
 							  			this.rest.patchDG(this.dataGroups[i].on_box_name, masterRecords, dest1, "").subscribe((result) => {
@@ -383,7 +390,7 @@ export class DevicesComponent implements OnInit {
 
 	  	}, (err) => {
 	  		console.log(err);
-	      	console.log('Error Getting Master Rrecods for MD5:',dest, '-',this.dataGroups[i].on_box_name);
+	      	console.log('Error Getting Primary Rrecods for MD5:',dest, '-',this.dataGroups[i].on_box_name);
 	      	this.noResponse[i].push(dest)
 	      	this.spin=false;
 	    }
