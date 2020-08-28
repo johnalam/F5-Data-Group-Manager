@@ -93,7 +93,8 @@ export class DevicesComponent implements OnInit {
       if (typeof this.results.name != 'undefined') {
 	      this.groupname=this.results.name;
        }
-       console.log('Admin2: ', environment.admin)
+       console.log('Admin2: ', environment.admin , this.openDevPanel);
+       this.openDevPanel = false;
        if (this.route.snapshot.params['id']==='dev') {
        		this.openDevPanel = true;
        	}
@@ -103,6 +104,12 @@ export class DevicesComponent implements OnInit {
   	this.data.setDestAddress(device_name);
   	// /data-groups maps top the product component.  Until i rename the component.
    	this.router.navigate(['/dataGroups/', device_name, addr]);
+  }
+
+  get_virtuals(device_name, addr) {
+  	this.data.setDestAddress(device_name);
+  	// /data-groups maps top the product component.  Until i rename the component.
+   	this.router.navigate(['/Applications/', device_name, addr]);
   }
 
   get_pools() {

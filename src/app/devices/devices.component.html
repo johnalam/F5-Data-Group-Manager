@@ -54,31 +54,36 @@
 <div *ngIf="openDevPanel">
 <h2>{{title}}</h2>
 
-<ul class="products">
-  <li *ngFor="let device of device_list; let i=index;">
-    <div (click)="get_dgs(device.name, device.address)">
-      <span class="badge">{{i+1}}</span> <span style="  display: inline-block; width:220px">{{device.name}}</span>&nbsp;
-       <span class="type">{{device.type}}</span><span style="  display: inline-block; width:270px">{{device.address}}</span>
-    </div>
-    <div>   
-    <button class="delete" title="Get Data-Groups"
-      (click)="get_dgs(device.name, device.address)">Get DGs</button>
-      &nbsp;
+      <ul class="products">
+        <li *ngFor="let device of device_list; let i=index;">
+          <div (click)="get_dgs(device.name, device.address)">
+            <span class="badge">{{i+1}}</span> <span style="  display: inline-block; width:220px">{{device.name}}</span>&nbsp;
+             <span class="type">{{device.type}}</span><span style="  display: inline-block; width:270px">{{device.address}}</span>
+          </div>
+          <div>   
+          <button class="delete" title="Get Data-Groups"
+            (click)="get_dgs(device.name, device.address)">Get DGs</button>
+            &nbsp;
 
-      <button class="delete" title="Upload DG Scripts" (click)="upload_scripts(i, device.address)">Upload DG Scripts</button>
-      &nbsp;<button class="message" *ngIf="(device_list[i].scriptUploadStatus!=undefined)">{{device_list[i].scriptUploadStatus}}</button>
+            <button class="delete" title="Upload DG Scripts" (click)="upload_scripts(i, device.address)">Upload DG Scripts</button>&nbsp;
 
-     <button class="delete" title="Export Application to AS3"
-      (click)="exportPanel(device.name, device.address)">Mine AS3 Declarations</button>
-      &nbsp;
+            <button class="message" *ngIf="(device_list[i].scriptUploadStatus!=undefined)">{{device_list[i].scriptUploadStatus}}</button>&nbsp;
 
-      <button class="delete" title="Upload Export Script"
-      (click)="upload_scripts(i, device.address, 'AS3Export')">Upload Export Script</button>
-      &nbsp;
+           <button class="delete" title="Get Apps"
+            (click)="get_Applications(device.name, device.address)">Applications</button>
+            &nbsp;
 
-    </div>
-  </li>
-</ul>
+           <button class="delete" title="Export Application to AS3"
+            (click)="exportPanel(device.name, device.address)">Mine AS3 Declarations</button>
+            &nbsp;
+
+            <button class="delete" title="Upload Export Script"
+            (click)="upload_scripts(i, device.address, 'AS3Export')">Upload Export Script</button>
+            &nbsp;
+
+          </div>
+        </li>
+      </ul>
       <!--<button class="delete" title="Push to all"
       (click)="upload_scripts(device.address)">Push script to all</button>
       &nbsp; -->
@@ -117,10 +122,9 @@
         <label>File:
             <input type="file" (change)="onChange($event.target.files)">
         </label><br>
-
-      <p>
-    </div>
-
+        <p>
+      </div>
+</div>
 
 <div  class="spinner-wrapper" style="position: relative;">
   <h2>{{gptitle}}</h2>

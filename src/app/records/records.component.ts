@@ -111,7 +111,7 @@ export class RecordsComponent implements OnInit {
 
 
     // load IP address of BigIP currently getting records from, 
-    // if we start with the data-group panel, this is the "master"
+    // if we start with the data-group panel, this is the "Primary"
     // if we start with the devices panel, this is the chosen device before choosing a data-group.
     this.masterAddress = this.currentDevice.master;
 
@@ -196,7 +196,7 @@ export class RecordsComponent implements OnInit {
 
      if (this.grpSrc == 'BigIP' ) {
            
-           //console.log('master hostname: ' , master, this.device_hostnames[this.masterAddress]);
+           //console.log('Primary hostname: ' , master, this.device_hostnames[this.masterAddress]);
            if (this.device_hostnames[this.masterAddress]==undefined) {
                 this.dgPushStatus.push({ dest: this.masterAddress, label: this.masterAddress, group: "", status: "Could not find destination hostname", operation: op});
                 this.data.changeMessage('No hostname for '+ this.masterAddress);
@@ -245,14 +245,14 @@ export class RecordsComponent implements OnInit {
                         console.log(" Page: ", op, this.paginator.pageSize,this.paginator.length, this.pIndex, this.paginator, this.sort);
                       }
                   }, (err) => {
-                      this.dgPushStatus.push({ dest: dest, label: this.masterAddress , group: groupname, status: op+' Failed on Master, Aborting.', operation: op});
+                      this.dgPushStatus.push({ dest: dest, label: this.masterAddress , group: groupname, status: op+' Failed on Primary, Aborting.', operation: op});
                       this.pushStatusDataSource = [...this.dgPushStatus];
                       this.data.changeMessage( (op === 'save') ? 'Not Saved': op+' Failed.');
                   });
 /*              } else {
                   this.recordOps('save',groupname, this.recordData, dest).subscribe((result) => {
                       this.data.changeMessage("Saved to Permanent Config");
-                      console.log ('Master Device update:', this.masterAddress, dest);
+                      console.log ('Primay Device update:', this.masterAddress, dest);
                   }, (err) => {
                       console.log(err);
                       this.dgPushStatus.push({ dest: dest, label: this.masterAddress, group: "", status: err, operation: op});
@@ -386,9 +386,6 @@ updateTable(key, value, index, op) {
       //this.Operation='add'
   }
 
-  onRowClicked(groupname , recname, recvalue) {
-    this.router.navigate(['/record-details/', 'UPDATE', groupname,  recname, recvalue]);
-  }
 
   delete(group, name) {
     this.rest.deleteRecord(group, name, ' ', this.s1)
@@ -459,23 +456,26 @@ updateTable(key, value, index, op) {
   startPush() {
 
     this.dgPushStatus = [];
+    this.pushStatusDataSource = [...this.dgPushStatus];
     for (var dev in  this.selected) {
         //this.rest.addGroup(this.group);
         let dest=this.device_hostnames[this.selected[dev]];
         //console.log('Start Push', this.selected[dev], dest);
         if (dest!=undefined) {
             this.addGroup(this.group, dest).subscribe((result) => {
-                  this.dgPushStatus.push({ dest: this.selected[dev], label: this.selected[dev], group: '', status: 'Data-group Pushed Successfully', operation: 'add group'});
-                  console.log('Data-Group added.');
+                  this.dgPushStatus.push({ dest: dest, label: this.selected[dev], group: '', status: this.group.name+'-Pushed Successfully', operation: 'add group'});
+                  console.log('Data-Group added Successfully', this.dgPushStatus);
                 }, (err) => {
                   this.dgPushStatus.push({ dest: this.selected[dev], label: this.selected[dev], group: '', status: err, operation: 'add group'});
                   console.log('->', err);
                 });
-
+                this.pushStatusDataSource = [...this.dgPushStatus];
         } else {
             this.dgPushStatus.push({ dest: this.selected[dev], label: this.selected[dev], group: '', status: 'Hostname not found', operation: 'add group'});
+            this.pushStatusDataSource = [...this.dgPushStatus];
         }
       }
+
   }
   
 
@@ -502,10 +502,11 @@ updateTable(key, value, index, op) {
     return this.http.post<any>( '/mgmt/tm/ltm/data-group/internal/', datagroup, httpOptions).pipe(
       tap((group) => {
       
-          //this.dgPushStatus.push({ dest: dest, label: this.deviceMap[dest], group: group, status: 'OK', operation: 'Push to Big-IPs'});
-          //this.pushStatusDataSource = [...this.dgPushStatus];
+          this.dgPushStatus.push({ dest: dest, label: this.deviceMap[dest], group: group.name, status: group.name+' Push Successfull', operation: 'Push to Big-IPs'});
+          this.pushStatusDataSource = [...this.dgPushStatus];
 
-        console.log("Added OK:  group: ", group.name , 'to:', dest, 'Array length:', this.pushStatusDataSource.length, this.pushStatusDataSource[this.pushStatusDataSource.length - 1 ]) ;
+        console.log("Added OK:  group: ", group.name , 'to:', dest);
+          //'Array length:', this.pushStatusDataSource.length, this.pushStatusDataSource[this.pushStatusDataSource.length - 1 ]) ;
       }),
       catchError(this.handleError<any>('Failed Push to Big-IPs', group.name, dest))
     );
@@ -517,7 +518,7 @@ updateTable(key, value, index, op) {
 
 
       // TODO: send the error to remote logging infrastructure
-      console.error(error.error.message); // log to console instead
+      console.error(error); // log to console instead
       
       // TODO: better job of transforming error for user consumption
       //console.log(dest, `${operation} failed: ${error.message}`);
@@ -532,6 +533,7 @@ updateTable(key, value, index, op) {
       }
 
       if ( error.error.message !== undefined ) {
+        console.error(error.error.message); 
         this.dgPushStatus.push({ dest: dest, label: this.deviceMap[dest], group: group, status: error.error.message, operation: operation});
       } else {
         this.dgPushStatus.push({ dest: dest, label: this.deviceMap[dest], group: group, status: operation, operation: operation});
@@ -558,7 +560,7 @@ updateTable(key, value, index, op) {
 
   openDialog(): void {
 
-    console.log('Dialog open status', this.openRecDialog);
+    //console.log('Dialog open status', this.openRecDialog);
     if (this.openRecDialog) {
       return;
     }
@@ -571,7 +573,7 @@ updateTable(key, value, index, op) {
 
     dialogRef.afterClosed().subscribe(result => {
 
-        console.log('result data:', result.event,result.data, this.recOperation, this.group.name, this.recordData.index);
+        //console.log('result data:', result.event,result.data, this.recOperation, this.group.name, this.recordData.index);
 
         this.recordData.name = result.data.name;
         this.recordData.data = result.data.data;
@@ -581,18 +583,11 @@ updateTable(key, value, index, op) {
           this.inMemRecOps(this.recordData.index, this.group.name , this.recordData.name, this.recordData.data, result.data.op)
         }
 
-
     });
-
-
-
 
   }
 
-
-
 }
-
 
 
 @Component({
