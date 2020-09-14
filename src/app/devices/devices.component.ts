@@ -44,7 +44,11 @@ export class DevicesComponent implements OnInit {
   declar:string = ''
 
 
-  admin:boolean = environment.admin;
+  //admin:boolean = environment.admin;
+  admin:boolean = false;
+  // admin1 keeps value of admin var for "Toggle Admin View" button in html.
+  admin1:boolean = false;
+  loggedInUser: string ='unspecified';
   i:any=0;
   spin:boolean = false;
 
@@ -263,14 +267,26 @@ export class DevicesComponent implements OnInit {
       );        
   }
 
+  logout() {
+    this.rest.getgrpFromURL('/logout', 'logout')
+        .subscribe(res => {
+          this.loggedInUser='Logged Out';
+        }, (err) => {
+          console.log('Unable to verify logout. ',err);
+          this.loggedInUser='Uncertain';
+        }
+      );        
+  }
 
   downloadDGList(url) {
  
-    this.rest.getgrpFromURL('/'+url, url)
+    this.rest.getGrpListFromURL('/'+url, url)
       .subscribe(res => {
-      		this.groups=res;
+      		this.groups=res.body;
   	  		this.dataGroups=this.groups;
-  	        //console.log('dldDG: ' , this.dataGroups);
+  	        console.log('dldDG: ' , res.headers.get('X-SIQ-Admin') , res.headers.get('X-Auth-User') );
+  	        if ( res.headers.get('X-SIQ-Admin') === 'true' ) { this.admin = true };
+  	        this.loggedInUser = res.headers.get('X-Auth-User');
 
         }, (err) => {
           console.log(err);

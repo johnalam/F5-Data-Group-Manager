@@ -83,6 +83,10 @@
 .mine {
   background-color: palegoldenrod;
 }
+.mat-raised-button {
+  height: 40px;
+  line-height: 0px;
+}
 
 button {
   background-color: #eee;

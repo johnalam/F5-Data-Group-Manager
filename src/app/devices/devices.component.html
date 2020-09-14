@@ -1,20 +1,37 @@
 
-<div *ngIf="(admin)">
-<h2>Big-IP Manager</h2>
+<div >
+<h2>F5 Big-IP Manager</h2><h4>    Logged In User: {{ loggedInUser }}</h4>
 </div>
 
-    <div *ngIf="(admin)">
-      <button *ngIf="(openDevPanel)" mat-raised-button (click)="openDevPanel=false;" >
+
+    <div>
+      <button *ngIf="(admin && openDevPanel)" mat-raised-button (click)="openDevPanel=false;" >
         Manage Data Groups
       </button>
 
-      <button *ngIf="(!openDevPanel)" mat-raised-button (click)="openDevicesPanel()" >
+      <button *ngIf="(admin && !openDevPanel)" mat-raised-button (click)="openDevicesPanel()" >
         Manage Big-IP Devices
       </button>
+
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <button *ngIf="(admin)" mat-raised-button (click)="admin1=true;admin=false;openDevPanel=false" >
+            Switch to User View
+      </button>
+      <button *ngIf="(!admin && admin1)" mat-raised-button (click)="admin1=true;admin=true" >
+            Switch to Admin View
+      </button>
+
+
+
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <button mat-raised-button (click)="logout()" >
+            Logout
+      </button>
       <p>
+    </div>
 
 
-</div>
+
 
   <div *ngIf="(addGroup)">
     <label>Create new group on this client:</label><br>

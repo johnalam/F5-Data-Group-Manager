@@ -28,6 +28,7 @@ const httpOptions = {
 })
 
 
+
 export class RestService {
 
   constructor(private http: HttpClient) {}
@@ -50,6 +51,37 @@ export class RestService {
     
     return this.http.get(endpoint + elmnt , httpOptions).pipe(
       map(this.extractData));
+  }
+
+  getGrpListFromURL(loc, url): Observable<any> {
+    const URLOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'target': url
+      }),
+      observe: 'response',
+      responseType: 'json'
+    };
+
+    return this.http.get(loc , {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'target': url
+      }),
+      observe: 'response'
+    }
+     ).pipe(
+      map(
+        data => {
+          console.log('host header: ', data.headers.get('Server'));
+          console.log('body: ',data.body);
+          return data;
+          //{ "adminRole" : data.headers.get('Server')), "groups": data.body }
+        },
+        error => {
+          console.error('Error reading headers from datagroups.json file.');
+        }
+      ));
   }
 
   getgrpFromURL(loc, url): Observable<any> {
