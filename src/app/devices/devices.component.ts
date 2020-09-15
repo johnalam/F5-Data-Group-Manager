@@ -269,17 +269,7 @@ export class DevicesComponent implements OnInit {
   }
 
   logout() {
-  	this.location.go("/logout");
-
-/*    this.rest.getgrpFromURL('/logout', 'logout')
-        .subscribe(res => {
-          this.loggedInUser='Logged Out';
-        }, (err) => {
-          console.log('Unable to verify logout. ',err);
-          this.loggedInUser='Uncertain';
-        }
-      );        
-  */
+  	window.open('/logout', '_self');
   }
 
   downloadDGList(url) {
