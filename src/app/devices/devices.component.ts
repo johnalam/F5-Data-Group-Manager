@@ -285,7 +285,7 @@ export class DevicesComponent implements OnInit {
       		this.groups=res.body;
   	  		this.dataGroups=this.groups;
   	        console.log('dldDG: ' , res.headers.get('X-SIQ-Admin') , res.headers.get('X-Auth-User') );
-  	        if ( res.headers.get('X-SIQ-Admin') === 'true' ) { this.admin = true };
+  	        if ( res.headers.get('X-SIQ-Admin').toLowerCase() === 'true' ) { this.admin = true };
   	        this.loggedInUser = res.headers.get('X-Auth-User');
 
         }, (err) => {
