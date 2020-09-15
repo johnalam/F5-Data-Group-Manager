@@ -9,6 +9,7 @@ import  MD5 from 'crypto-js/md5';
 import { switchMap } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { Location } from '@angular/common';
 //import * as CryptoJS from 'crypto-js';
 
 
@@ -29,7 +30,7 @@ export class DevicesComponent implements OnInit {
   					};
 
 
-  constructor(private route: ActivatedRoute, private router: Router, private data: DataService, public rest:RestService) { }
+  constructor(private route: ActivatedRoute, private router: Router, private data: DataService, public rest:RestService, private location: Location ) { }
 
 
   private subscription: Subscription;
@@ -268,7 +269,9 @@ export class DevicesComponent implements OnInit {
   }
 
   logout() {
-    this.rest.getgrpFromURL('/logout', 'logout')
+  	this.location.go("/logout");
+
+/*    this.rest.getgrpFromURL('/logout', 'logout')
         .subscribe(res => {
           this.loggedInUser='Logged Out';
         }, (err) => {
@@ -276,6 +279,7 @@ export class DevicesComponent implements OnInit {
           this.loggedInUser='Uncertain';
         }
       );        
+  */
   }
 
   downloadDGList(url) {
