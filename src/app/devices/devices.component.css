@@ -80,6 +80,11 @@
   border-radius: 4px 0 0 4px;
 }
 
+.products .dgcolumns {
+  line-height: 1;
+  display: inline-block;
+}
+
 .mine {
   background-color: palegoldenrod;
 }
@@ -89,6 +94,7 @@
 }
 
 button {
+  position: relative;
   background-color: #eee;
   border: none;
   padding: 5px 10px;
@@ -103,22 +109,46 @@ button:hover {
 }
 
 button.delete {
-  position: relative;
-  left: 665px;
-  top: -38px;
+  left: 855px;
+  top: -39px;
   background-color: gray !important;
   color: white;
-  font-size: 12px;
-  height: 24px;
+  font-size: 10px;
+  max-width: 13%;
+  min-height: 28px;
 }
 button.message {
-  position: relative;
-  left: 675px;
-  top: -38px;
+  left: 875px;
+  top: -39px;
   color: black;
-  font-size: 12px;
-  height: 24px;
+  font-size: 10px;
+  max-width: 13%;
+  min-height: 28px;
 }
+
+button.dev-click {
+  left: 657px;
+  top: -39px;
+  background-color: gray !important;
+  color: white;
+  font-size: 10px;
+  max-width: 13%;
+  margin: 2px;
+
+}
+button.dev-message {
+  left: 677px;
+  top: -39px;
+  color: black;
+  font-size: 10px;
+  max-width: 13%;
+  margin: 2px;
+
+}
+
+
+
+
 
 spinner {
   position: relative;

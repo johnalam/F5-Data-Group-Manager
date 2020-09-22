@@ -71,43 +71,43 @@
 <div *ngIf="openDevPanel">
 <h2>{{title}}</h2>
 
-      <ul class="products">
+      <ul class="products" style="min-width: 600px">
         <li *ngFor="let device of device_list; let i=index;">
           <div (click)="get_dgs(device.name, device.address)">
             <span class="badge">{{i+1}}</span> <span style="  display: inline-block; width:220px">{{device.name}}</span>&nbsp;
              <span class="type">{{device.type}}</span><span style="  display: inline-block; width:270px">{{device.address}}</span>
-          </div>
-          <div>   
-          <button class="delete" title="Get Data-Groups"
-            (click)="get_dgs(device.name, device.address)">Get DGs</button>
-            &nbsp;
+          
+          
+          <button class="dev-click" title="Get Data-Groups"
+            (click)="get_dgs(device.name, device.address)">Get Data-Groups</button>
+          
 
-            <button class="delete" title="Upload DG Scripts" (click)="upload_scripts(i, device.address)">Upload DG Scripts</button>&nbsp;
+            <button class="dev-click" title="Upload DG Scripts" (click)="upload_scripts(i, device.address)">Upload DG Scripts</button>
 
-            <button class="message" *ngIf="(device_list[i].scriptUploadStatus!=undefined)">{{device_list[i].scriptUploadStatus}}</button>&nbsp;
+            <button class="dev-message" *ngIf="(device_list[i].scriptUploadStatus!=undefined)">{{device_list[i].scriptUploadStatus}}</button>
 
-           <button class="delete" title="Get Apps"
-            (click)="get_Applications(device.name, device.address)">Applications</button>
-            &nbsp;
+           <!-- <button class="dev-click" title="Get Apps"
+            (click)="get_Applications(device.name, device.address)">Applications</button> -->
+            
 
-           <button class="delete" title="Export Application to AS3"
+           <button class="dev-click" title="Export Application to AS3"
             (click)="exportPanel(device.name, device.address)">Mine AS3 Declarations</button>
-            &nbsp;
+            
 
-            <button class="delete" title="Upload Export Script"
+            <button class="dev-click" title="Upload Export Script"
             (click)="upload_scripts(i, device.address, 'AS3Export')">Upload Export Script</button>
-            &nbsp;
+            
 
           </div>
         </li>
       </ul>
       <!--<button class="delete" title="Push to all"
       (click)="upload_scripts(device.address)">Push script to all</button>
-      &nbsp; -->
+      &nbsp; 
 
       <button class="delete" title="Clear Panel"
       (click)="openDevPanel=false">Clear Panel</button>
-      &nbsp;
+      &nbsp;-->
 </div>
 
 
@@ -149,13 +149,14 @@
   diameter="35" ></mat-spinner>
 </div>
 
-<ul class="products">
-  <li *ngFor="let grp of dataGroups; let i=index;">
-    <div (click)="records(i)">
-      <span class="badge">{{i+1}}</span> <span style="  display: inline-block; width:200px">{{grp.name}}</span> &nbsp;
-      <span class="type">Primary</span><span style="  display: inline-block; width:255px">{{grp.master}}</span>
-      <span class="type">Subs</span><span style="  display: inline-block; width:20px">{{dataGroups[i].devices.length}}</span>
-    </div>
+<ul class="products" style="min-width: 850px">
+  <li *ngFor="let grp of dataGroups; let i=index;"  style="width: 100%">
+    <div (click)="records(i)" >
+      <span class="badge">{{i+1}}</span> <span class= "dgcolumns" style="width: 20%">{{grp.name}}</span>
+      <span class="type">Primary</span> <span class= "dgcolumns" style="width: 20%">{{grp.master}}</span>
+      <span class="type">Subs</span> <span class= "dgcolumns" style="width:20px">{{dataGroups[i].devices.length}}</span>
+      <span class="type">Desc</span> <span class= "dgcolumns" style="width: 30%; font-size: 10pt">{{grp.description}}</span>
+    
      
     <button *ngIf="(dataGroups[i].devices.length !=0)"  class="delete" title="Compare Primary to subs"
       (click)="primaryMD5Hash(i, false)">Compare Primary to Subs</button>
@@ -167,10 +168,10 @@
       
 
 
-    <button *ngIf="(noHostnameSub[i] && noHostnameSub[i].length !=0)" class="message" style="background-color: red" title="Check alias to hostname mapping"
+    <button *ngIf="(noHostnameSub[i] && noHostnameSub[i].length !=0)" class="message" style=" background-color: red" title="Check alias to hostname mapping"
       >{{noHostnameSub[i].length}} subs with bad names</button>
       
-    <button *ngIf="(noResponse[i] && noResponse[i].length != 0)" class="message" style="background-color: red" title="Check hostname or DNS mapping"
+    <button *ngIf="(noResponse[i] && noResponse[i].length != 0)" class="message" style=" background-color: red" title="Check hostname or DNS mapping"
       >No response from {{noResponse[i]}}</button>
 
 
@@ -179,16 +180,16 @@
        
     <!-- primaryMD5Hash(i -> is table row, true -> is sync or no sync) -->
 
-    <button *ngIf="(noHostnameSub[i] && match_with_master[i] && match_with_master[i].length + noHostnameSub[i].length == dataGroups[i].devices.length)" class="message" style="background-color: lightgreen" title="In Sync"
+    <button *ngIf="(noHostnameSub[i] && match_with_master[i] && match_with_master[i].length + noHostnameSub[i].length == dataGroups[i].devices.length)" class="message" style=" background-color: lightgreen" title="In Sync"
       >{{match_with_master[i].length}} of {{dataGroups[i].devices.length}} IN SYNC with Primary</button>
       
 
     <button *ngIf="(group_missing_on_master[i])" class="delete" title="Add Group to Primary"
       (click)="addGrpToMaster(i)">Click to add starter group to Primary</button>
       
-    <button *ngIf="(group_fetch_response[i])" class="message" style="background-color: red" title="Group fetch response"
-      >{{group_fetch_response[i]}}</button>
-
+    <!-- <button *ngIf="(group_fetch_response[i])" class="message" style="right:-690px; background-color: red" title="Group fetch response"
+      >{{group_fetch_response[i]}}</button> -->
+</div>
 
     </li>    
 </ul>

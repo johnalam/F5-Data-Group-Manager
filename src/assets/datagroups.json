@@ -4,6 +4,7 @@
 		"on_box_name": "offices",
 		"type" : "string",
 		"master": "BigIP1",
+		"description": "This is a description",
 		"devices": [
 			"BigIP2"
 		]
@@ -13,6 +14,7 @@
 		"on_box_name": "cloudflare-ranges",
 		"type" : "string",
 		"master": "BigIP2.company.com",
+		"description": "This is a description",
 		"devices": [
 			"BigIP3",
 			"BigIP2",
@@ -24,6 +26,7 @@
 		"on_box_name": "list2",
 		"type" : "string",
 		"master": "BigIP2",
+		"description": "This is a description",
 		"devices": [
 			"BigIP1",
 			"BigIP3"
@@ -34,6 +37,7 @@
 		"on_box_name": "IP_WL",
 		"type" : "IP",
 		"master": "BigIP2",
+		"description": "This is a description",
 		"devices": [
 			"BigIP2",
 			"BigIP1",
