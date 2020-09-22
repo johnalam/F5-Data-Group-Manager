@@ -180,6 +180,18 @@ export class RecordsComponent implements OnInit {
     );
   }
 
+  refreshTable(data) {
+
+      this.group = data;
+      //this.group.source = 'BigIP';
+      //this.group.devices= this.relatedDevices;
+      this.dataSource = new MatTableDataSource(data.records);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+
+
+  }
+
 
   recOps(index ,groupname, key, value, op) {
     // Called from table record selection.
@@ -211,7 +223,12 @@ export class RecordsComponent implements OnInit {
                       } else {
                           this.data.changeMessage("Updated Running config only");
                           //this.getRecords();
-                          this.updateTable(key, value, index, op);
+                          this.updateTable(key, value, index, op)
+
+                              //this.dataSource = new MatTableDataSource(this.group.records);
+                              //this.dataSource.paginator = this.paginator;
+                              //this.dataSource.sort = this.sort;
+                          
                       }
 
                       for (var x in this.relatedDevices) {
@@ -285,8 +302,9 @@ export class RecordsComponent implements OnInit {
 updateTable(key, value, index, op) {
 
           if (op=='ADD' || op=='REPEAT') {
-              this.group.records.push({"name":key, "data":value})
-              console.log('Adding record:', key, value, this.group.records.indexOf(key));
+              this.group.records.push({"name":key, "data":value});
+              this.getRecords();
+
               //this.dataSource.paginator.nextPage();
 
           } else if (op=='UPDATE') {
