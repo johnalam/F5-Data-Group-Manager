@@ -37,9 +37,10 @@ export class DevicesComponent implements OnInit {
 
 
   openDevPanel:boolean = false;
-
   openDGPanel:boolean = true;
   openExportPanel:boolean = false;
+  openiRulesPanel:boolean = false;
+
   export_Device:string='';
   export_Address:string='';
   declar:string = ''
@@ -60,6 +61,7 @@ export class DevicesComponent implements OnInit {
   device_hostnames:any=[];
   dataGroups:any = [];
   groups:any = [];
+  iRules:any = [];
   fileContent: string = '';
   groupname: string = '';
   addGroup:boolean = false;
@@ -272,6 +274,10 @@ export class DevicesComponent implements OnInit {
   	window.open('/logout', '_self');
   }
 
+  openBigIPUI(dest) {
+  	window.open('https://'+this.device_hostnames[dest], '_blnak');
+  }
+
   downloadDGList(url) {
  
     this.rest.getGrpListFromURL('/'+url, url)
@@ -312,6 +318,26 @@ export class DevicesComponent implements OnInit {
 
   }
 
+  getiRulesFromDevice(grp, dest) {
+    var elmnt = 'ltm/rule';
+    this.iRules = [];
+    this.rest.getItemsFromDevice(elmnt, dest, this.s1).subscribe((data: any) => {
+
+      for (var x in data.items) {
+      	if (!data.items[x].name.startsWith('_sys_') && data.items[x].apiAnonymous.includes(grp)) {
+      		this.iRules.push({"device": dest, "name": data.items[x].name, "partition": data.items[x].partition, "code": data.items[x].apiAnonymous, "openCode": false, 
+      			"datagroup": grp});
+      		var l=this.iRules.length -1;
+      		//console.log('iRules: ', this.iRules[l]);
+      	}
+      }
+
+      //console.log('iRules: ', this.iRules);
+    }, (err) => {
+          console.error('Could not get iRules on: ',dest, err);
+    });
+  }
+
   /*syncToPrimary(i) {
   	let dest=this.device_hostnames[this.dataGroups[i].master];
   	if (dest!=undefined) {
@@ -339,6 +365,27 @@ export class DevicesComponent implements OnInit {
   	}
 
   }*/
+
+  findiRulesForGroup(i, grp) {
+  	this.spin=true;
+  	let dest=this.device_hostnames[this.dataGroups[i].master];
+	this.noHostnameSub[i] = [];
+	this.noResponse[i] = [];
+  	if (dest!=undefined) {
+	  	this.getiRulesFromDevice(this.dataGroups[i].on_box_name, dest);
+	    for (var x in this.dataGroups[i].devices) {
+	      	dest=this.device_hostnames[this.dataGroups[i].devices[x]];
+	        if (dest != undefined) {
+	        	this.getiRulesFromDevice(this.dataGroups[i].on_box_name, dest);
+	        }
+	    }
+	}
+    this.spin=false;
+    this.openDevPanel = false;
+  	this.openDGPanel = false;
+  	this.openExportPanel = false;
+  	this.openiRulesPanel = true;
+  }
 
 
   primaryMD5Hash(i, sync) {

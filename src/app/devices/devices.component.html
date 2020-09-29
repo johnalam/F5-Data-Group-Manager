@@ -5,7 +5,7 @@
 
 
     <div>
-      <button *ngIf="(admin && openDevPanel)" mat-raised-button (click)="openDevPanel=false;" >
+      <button *ngIf="(admin && openDevPanel)" mat-raised-button (click)="openDevPanel=false;openDGPanel=true" >
         Manage Data Groups
       </button>
 
@@ -76,7 +76,8 @@
           <div (click)="get_dgs(device.name, device.address)">
             <span class="badge">{{i+1}}</span> <span style="  display: inline-block; width:220px">{{device.name}}</span>&nbsp;
              <span class="type">{{device.type}}</span><span style="  display: inline-block; width:270px">{{device.address}}</span>
-          
+          </div>
+          <div>
           
           <button class="dev-click" title="Get Data-Groups"
             (click)="get_dgs(device.name, device.address)">Get Data-Groups</button>
@@ -97,7 +98,7 @@
             <button class="dev-click" title="Upload Export Script"
             (click)="upload_scripts(i, device.address, 'AS3Export')">Upload Export Script</button>
             
-
+            <button class="dev-click" title="Browse to Device" (click)="openBigIPUI(device.name)">Open Big-IP UI</button>
           </div>
         </li>
       </ul>
@@ -114,7 +115,11 @@
 
 
 <!-- end of admin div with datagroup buttons. --> 
-<div *ngIf="!openDevPanel">
+
+<!-- begin DG Panel -->
+
+
+<div *ngIf="!openDevPanel && openDGPanel">
 
     <div *ngIf="(admin)">
       <button mat-raised-button routerLink="/getgrpbyurl/" >
@@ -156,12 +161,14 @@
       <span class="type">Primary</span> <span class= "dgcolumns" style="width: 20%">{{grp.master}}</span>
       <span class="type">Subs</span> <span class= "dgcolumns" style="width:20px">{{dataGroups[i].devices.length}}</span>
       <span class="type">Desc</span> <span class= "dgcolumns" style="width: 30%; font-size: 10pt">{{grp.description}}</span>
-    
+    </div>
+    <div>
      
     <button *ngIf="(dataGroups[i].devices.length !=0)"  class="delete" title="Compare Primary to subs"
       (click)="primaryMD5Hash(i, false)">Compare Primary to Subs</button>
 
-
+    <button *ngIf="(admin)"  class="delete" title="Show list of iRules using this DG"
+      (click)="findiRulesForGroup(i, grp.name)">iRules using this DG</button>
 
     <button *ngIf="(device_hostnames[grp.master]==undefined)" class="message" style="background-color: red" title="Check Hostname"
       > Primary name not in hostname list </button>
@@ -194,5 +201,33 @@
     </li>    
 </ul>
 
+
+</div>
+
+
+
+<!-- End DG paner, Begin iRule Panel -->
+
+
+<div *ngIf="openiRulesPanel && admin">
+            <button mat-raised-button title="Back"
+            (click)="openDGPanel=true; openiRulesPanel=false;">Back to DG Panel</button>
+<h2>iRules using DataGroup</h2>
+
+      <ul class="products" style="min-width: 1000px">
+        <li *ngFor="let irule of iRules; let i=index;" style="width: 100%; min-height: 195px">
+          <div >
+            <span class="badge">{{i+1}}</span> <span style="  display: inline-block; width:210px">{{irule.name}}</span>&nbsp;
+             <span class="type">Device</span><span style="  display: inline-block; width:210px">{{irule.device}}</span>
+             <span class="type">Partition</span><span style="  display: inline-block; width:150px">{{irule.partition}}</span>
+            <!-- <button class="dev-click" title="Browse to Device" (click)="irule.openCode[i]=!irule.openCode[i]">Open/Close iRule Code"</button> -->
+             
+                 <textarea rows="10" cols="60" name="Declaration" [(ngModel)]="irule.code"></textarea>
+                 <button class="dev-click" title="Browse to Device" (click)="openBigIPUI(irule.device)">Open Big-IP UI</button>
+             
+
+          </div>
+        </li>
+      </ul>
 
 </div>

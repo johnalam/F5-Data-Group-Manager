@@ -33,7 +33,7 @@ export class ProductComponent implements OnInit {
     this.groups = [];
     const elmnt = 'ltm/data-group/internal';
     //this.products = [];
-    this.rest.getGroupsFromDevice(elmnt, this.device_hostnames[this.device_name], this.s1).subscribe((data: any) => {
+    this.rest.getItemsFromDevice(elmnt, this.device_hostnames[this.device_name], this.s1).subscribe((data: any) => {
       //console.log(data.items);
 
       // todo:  data.service should be imported and grpSrc should be set to 'BigIP' here.

@@ -40,7 +40,7 @@ export class RestService {
 
 
 
-  getGroupsFromDevice(elmnt, dest, s1): Observable<any> {
+  getItemsFromDevice(elmnt, dest, s1): Observable<any> {
 
     const httpOptions = {
       headers: new HttpHeaders({
@@ -53,6 +53,7 @@ export class RestService {
       map(this.extractData));
   }
 
+// below imports datagroups from datagroups.json
   getGrpListFromURL(loc, url): Observable<any> {
     const URLOptions = {
       headers: new HttpHeaders({

@@ -114,8 +114,9 @@ button.delete {
   background-color: gray !important;
   color: white;
   font-size: 10px;
-  max-width: 13%;
+  max-width: 11%;
   min-height: 28px;
+  margin: 2px;
 }
 button.message {
   left: 875px;
@@ -124,6 +125,7 @@ button.message {
   font-size: 10px;
   max-width: 13%;
   min-height: 28px;
+  margin: 2px;
 }
 
 button.dev-click {
