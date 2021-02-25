@@ -8,7 +8,7 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource, MatTable} from '@angular/material/table';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of , throwError} from 'rxjs';
 import { map, catchError, tap, timeout } from 'rxjs/operators';
 
@@ -19,7 +19,6 @@ export interface GroupData {
   id: string;
   name: string;
   data: string;
-
 
 }
 export interface DialogData {
@@ -35,6 +34,7 @@ export interface DGPushStatus {
     group: string;
     operation: string;
 }
+
 
 @Component({
   selector: 'app-records',
@@ -84,7 +84,7 @@ export class RecordsComponent implements OnInit {
   // device_hostnames is all the devices.
   device_hostnames:any=[];
   currentDevice:any={};
-  s1:any='';
+  s1:any=[];
   public openRecDialog:boolean=false;
   referrer_page:string = "";
   
@@ -328,33 +328,66 @@ updateTable(key, value, index, op) {
 
 
 
-  /* 
-  recordUpdate(index ,groupname, key, value, op, dest ) {
-
-    this.recordOps(op, groupname, this.recordData, this.masterAddress).subscribe((result) => {
-      //this.op_result = this.operation + ' OK';
-      this.data.changeMessage("Updated running config only.");
-      this.getRecords();
-
-      if (op=="REPEAT") {
-        this.recordData.name =  "";
-        this.recOperation='ADD';
-        //this.router.navigate(['/record-details/', 'ADD', this.group , '', '']);
-      } else {
-        //this.router.navigate(['/records/'+this.group]);
-        this.recOperation="";
-      }
-
-    }, (err) => {
-      console.log(err);
-      this.data.changeMessage(err);
-    });
-
-  }
-  */
-
-
   recordOps (operation, groupname, record , dest ): Observable<any> {
+    let oper='';
+    if (operation=='add' || operation=='REPEAT') {
+        oper='add';
+    } else if ( operation=='UPDATE') {
+        oper='modify';
+    } else { 
+        oper=operation.toLowerCase();
+    }
+    let waitTime=15000;
+    let rec:any={};
+    let record_data = "";
+    let params = "";
+    let method = "";
+    let endpoint="";
+
+    if (operation=='save' || operation=='SAVE') {
+        rec = { "command":"save" };
+        operation = "save";
+        params = "config";
+        waitTime=40000;
+        endpoint="/mgmt/tm/sys";
+        method = "POST";
+    } else {
+        rec = { "name": groupname };
+        record.data=record.data.replace(/'/g,"`");
+        //console.log('data:', record.data);
+        record_data = (oper == 'delete' || record.data=='') ? "\}" :  "\{ data \'"+ record.data +"\'\}\}"
+        params = 'records '+oper+' \{'+record.name+record_data;
+        operation=oper+" "+groupname + " \"\{ "+ record.name + record_data;
+        endpoint="/mgmt/tm/ltm/data-group/internal/"+groupname;
+        method = "PATCH";
+    }
+    const RecOpsParams =  new HttpParams ()
+        .set('options', params);
+    const httpOptions = {
+      body:  JSON.stringify(rec),
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'User': this.s1.loggedInUser,
+        'operation': operation,
+        'target': dest
+      }),
+      params: RecOpsParams
+    };
+    
+    return this.http.request(method, endpoint , httpOptions).pipe(
+      timeout(waitTime),
+      tap(_ => {
+        //console.log(operation+" record id=${record.name}");
+
+      }),
+    catchError(
+        this.handleError<any>('Failed: ' + operation, groupname, dest)
+      )
+    );
+  }
+
+
+  recordOpsScript (operation, groupname, record , dest ): Observable<any> {
     let oper='';
     if (operation=='add' || operation=='REPEAT') {
         oper='add';
@@ -367,6 +400,7 @@ updateTable(key, value, index, op) {
     let rec:any={};
     if (operation=='save' || operation=='SAVE') {
         rec = { "command":"run" , "name":"/Common/add-rec", "utilCmdArgs": "save" };
+        operation = "save";
         waitTime=40000;
     } else {
         record.data=record.data.replace(/'/g,"`");
@@ -374,11 +408,13 @@ updateTable(key, value, index, op) {
         let record_data = (oper == 'delete' || record.data=='') ? "\}\"" :  "{ data \'"+ record.data +"\'\}\}\""
 
         rec = { "command":"run" , "name":"/Common/add-rec", "utilCmdArgs": oper +"-record " + groupname + " \"\{ "+ record.name + record_data };
+        operation=oper+" "+groupname + " \"\{ "+ record.name + record_data;
     }
     const httpOptions = {
       headers: new HttpHeaders({
-        'Content-Type':  'application/json',
-    //    'Authorization': 'Basic '+this.s1,
+        'Content-Type': 'application/json',
+        'User': this.s1.loggedInUser,
+        'operation': operation,
         'target': dest
       })
     };

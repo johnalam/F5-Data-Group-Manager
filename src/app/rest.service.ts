@@ -232,6 +232,31 @@ export class RestService {
   }
 
 
+  patch (id, payload, dest, s1): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'target': dest
+      })
+    };
+    
+
+    return this.http.patch( endpoint + id, payload , httpOptions)
+    .pipe(
+      timeout(10000),
+      map(this.extractData),
+      tap(_ => {
+        console.log('Patch success to '+id+' on'+dest );
+
+      }),
+      catchError((err: any) => {
+        //console.log(err);
+        return throwError(err);
+        })
+      );
+  }
+
+
   saveConfig () {
    let rec = { "command":"run" , "name":"/Common/add-rec", "utilCmdArgs": "save" };
     return this.http.post(endpoint + cliscript , JSON.stringify(rec) , httpOptions).pipe(

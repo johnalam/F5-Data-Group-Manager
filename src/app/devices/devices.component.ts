@@ -40,11 +40,13 @@ export class DevicesComponent implements OnInit {
   openDGPanel:boolean = true;
   openExportPanel:boolean = false;
   openiRulesPanel:boolean = false;
+  openCertificatesPanel:boolean = false;
 
   export_Device:string='';
   export_Address:string='';
-  declar:string = ''
+  declar:string = '';
 
+  certsButtonDisabled:boolean = false;
 
   //admin:boolean = environment.admin;
   admin:boolean = false;
@@ -55,13 +57,14 @@ export class DevicesComponent implements OnInit {
   spin:boolean = false;
 
   results:any = {};
-  // device_list is for presentiong choices.  It can be only the related devices or all the devices, depending on operation.
+  // device_list is for selection choices of devices.  It can be only the related devices or all the devices, depending on operation.
   device_list: any = [];
   // device_hostnames is all the devices.
   device_hostnames:any=[];
   dataGroups:any = [];
   groups:any = [];
   iRules:any = [];
+  certs:any = [];
   fileContent: string = '';
   groupname: string = '';
   addGroup:boolean = false;
@@ -76,7 +79,7 @@ export class DevicesComponent implements OnInit {
   noResponse:any = [];
 
   groupMaster:string ='';
-  s1:string='';
+  s1:any=[];
   tmshFormatRecs:string ='';
   masterHash:string = '';
 
@@ -275,7 +278,8 @@ export class DevicesComponent implements OnInit {
   }
 
   openBigIPUI(dest) {
-  	window.open('https://'+this.device_hostnames[dest], '_blnak');
+	window.open('https://'+dest, '_blnak');
+  	//window.open('https://'+this.device_hostnames[dest], '_blnak');
   }
 
   downloadDGList(url) {
@@ -286,7 +290,9 @@ export class DevicesComponent implements OnInit {
   	  		this.dataGroups=this.groups;
   	        console.log('dldDG: ' , res.headers.get('X-SIQ-Admin') , res.headers.get('X-Auth-User') );
   	        if ( res.headers.get('X-SIQ-Admin').toLowerCase() === 'true' ) { this.admin = true };
-  	        this.loggedInUser = res.headers.get('X-Auth-User');
+            this.s1.loggedInUser = res.headers.get('X-Auth-User');
+            this.loggedInUser = this.s1.loggedInUser;
+            this.data.setAuth(this.s1);
 
         }, (err) => {
           console.log(err);
@@ -365,6 +371,19 @@ export class DevicesComponent implements OnInit {
   	}
 
   }*/
+  getCertsFromDevice(dest) {
+    var elmnt = 'sys/file/ssl-cert';
+    this.certs = [];
+    this.rest.getItemsFromDevice(elmnt, this.device_hostnames[dest], this.s1).subscribe((data: any) => {
+		data.items.device = dest;
+    	console.log('certs:', data.items[1]);
+    	for  ( var x in data.items) {
+	    	let subj = data.items[x].subject.replace(/\,/g,'\n');
+	      	this.certs.push({"device": dest, "name" : data.items[x].name, "partition": data.items[x].partition, "issuer": data.items[x].issuer.replace(/\,/g,"\n"), 
+	      		"subject" : subj , "expiration": data.items[x].expirationString});
+      	}
+    });
+  }
 
   findiRulesForGroup(i, grp) {
   	this.spin=true;
@@ -385,6 +404,44 @@ export class DevicesComponent implements OnInit {
   	this.openDGPanel = false;
   	this.openExportPanel = false;
   	this.openiRulesPanel = true;
+  }
+
+  saveiRuleToBigIP(irule, ndx) {
+    var code=irule.code.replace(/\"/g ,'\\"').replace(/(\r\n|\n|\r)/mg,'\\n');
+
+    //let dest=this.device_hostnames[irule.device];
+    let dest=irule.device;
+    let payload= '{"apiAnonymous":"'+code+'" }';
+    console.log( dest, payload);
+
+    this.rest.patch('ltm/rule/'+irule.name, payload, dest, '').subscribe((result) => {
+                 console.log ('Irule saved to:', dest);
+                 this.iRules[ndx].saveResult="Saved";
+                 this.iRules[ndx].modified=false;
+          }
+          ,(err) => {
+                  //console.log ('iRule save error:', dest, payload);
+                  console.log (err.error.message);
+                  console.log (err);
+                  this.iRules[ndx].saveResult='Error: '+err.error.message;
+          });
+  }
+
+
+  getAllCertificates() {
+  	this.openCertificatesPanel = true;
+    this.openDevPanel = false;
+    this.openDGPanel = false;
+    this.certsButtonDisabled = true;
+
+    for (var name in this.device_hostnames) {
+    	console.log('cert device name:', this.device_hostnames[name]);
+    	this.getCertsFromDevice(name);
+    }
+
+	this.certsButtonDisabled = false;
+
+
   }
 
 

@@ -7,13 +7,16 @@
     <div>
       <button *ngIf="(admin && openDevPanel)" mat-raised-button (click)="openDevPanel=false;openDGPanel=true" >
         Manage Data Groups
-      </button>
+      </button>&nbsp;&nbsp;&nbsp;&nbsp;
 
       <button *ngIf="(admin && !openDevPanel)" mat-raised-button (click)="openDevicesPanel()" >
         Manage Big-IP Devices
-      </button>
+      </button>&nbsp;&nbsp;&nbsp;&nbsp;
 
-      &nbsp;&nbsp;&nbsp;&nbsp;
+      <button *ngIf="(admin)" mat-raised-button (click)="getAllCertificates()" [disabled]="certsButtonDisabled">
+        Manage Certificate
+      </button>&nbsp;&nbsp;&nbsp;&nbsp;
+
       <button *ngIf="(admin)" mat-raised-button (click)="admin1=true;admin=false;openDevPanel=false" >
             Switch to User View
       </button>
@@ -83,7 +86,7 @@
             (click)="get_dgs(device.name, device.address)">Get Data-Groups</button>
           
 
-            <button class="dev-click" title="Upload DG Scripts" (click)="upload_scripts(i, device.address)">Upload DG Scripts</button>
+            <!-- <button class="dev-click" title="Upload DG Scripts" (click)="upload_scripts(i, device.address)">Upload DG Scripts</button> -->
 
             <button class="dev-message" *ngIf="(device_list[i].scriptUploadStatus!=undefined)">{{device_list[i].scriptUploadStatus}}</button>
 
@@ -98,7 +101,7 @@
             <button class="dev-click" title="Upload Export Script"
             (click)="upload_scripts(i, device.address, 'AS3Export')">Upload Export Script</button>
             
-            <button class="dev-click" title="Browse to Device" (click)="openBigIPUI(device.name)">Open Big-IP UI</button>
+            <button class="dev-click" title="Browse to Device" (click)="openBigIPUI(device_hostnames[device.name])">Open Big-IP UI</button>
           </div>
         </li>
       </ul>
@@ -159,12 +162,13 @@
     <div (click)="records(i)" >
       <span class="badge">{{i+1}}</span> <span class= "dgcolumns" style="width: 20%">{{grp.name}}</span>
       <span class="type">Primary</span> <span class= "dgcolumns" style="width: 20%">{{grp.master}}</span>
-      <span class="type">Subs</span> <span class= "dgcolumns" style="width:20px">{{dataGroups[i].devices.length}}</span>
+      <span class="type">Subs</span> <span *ngIf="dataGroups[i].devices; else emptyField" class= "dgcolumns" style="width:20px">{{dataGroups[i].devices.length}}</span>
       <span class="type">Desc</span> <span class= "dgcolumns" style="width: 30%; font-size: 10pt">{{grp.description}}</span>
     </div>
     <div>
+    <ng-template #emptyField> 0 </ng-template>
      
-    <button *ngIf="(dataGroups[i].devices.length !=0)"  class="delete" title="Compare Primary to subs"
+    <button *ngIf="(dataGroups[i].devices && dataGroups[i].devices.length !=0)"  class="delete" title="Compare Primary to subs"
       (click)="primaryMD5Hash(i, false)">Compare Primary to Subs</button>
 
     <button *ngIf="(admin)"  class="delete" title="Show list of iRules using this DG"
@@ -182,9 +186,12 @@
       >No response from {{noResponse[i]}}</button>
 
 
-    <button *ngIf="(not_inSync_with_master[i] && not_inSync_with_master[i].length!=0)" class="message" style="background-color: red" title="inSync Check" title="Click to Sync" (click)="primaryMD5Hash(i,true)"
+    <button *ngIf="(admin && not_inSync_with_master[i] && not_inSync_with_master[i].length!=0)" class="message" style="background-color: red" title="inSync Check" title="Click to Sync" (click)="primaryMD5Hash(i,true)"
       >{{not_inSync_with_master[i].length}} of {{dataGroups[i].devices.length}} NOT IN SYNC with Primary</button>
-       
+
+    <button *ngIf="(!admin && not_inSync_with_master[i] && not_inSync_with_master[i].length!=0)" class="message" style="background-color: red" title="inSync Check" title="Not all in Sync"
+      >{{not_inSync_with_master[i].length}} of {{dataGroups[i].devices.length}} NOT IN SYNC with Primary</button>
+
     <!-- primaryMD5Hash(i -> is table row, true -> is sync or no sync) -->
 
     <button *ngIf="(noHostnameSub[i] && match_with_master[i] && match_with_master[i].length + noHostnameSub[i].length == dataGroups[i].devices.length)" class="message" style=" background-color: lightgreen" title="In Sync"
@@ -222,12 +229,59 @@
              <span class="type">Partition</span><span style="  display: inline-block; width:150px">{{irule.partition}}</span>
             <!-- <button class="dev-click" title="Browse to Device" (click)="irule.openCode[i]=!irule.openCode[i]">Open/Close iRule Code"</button> -->
              
-                 <textarea rows="10" cols="60" name="Declaration" [(ngModel)]="irule.code"></textarea>
-                 <button class="dev-click" title="Browse to Device" (click)="openBigIPUI(irule.device)">Open Big-IP UI</button>
+                <textarea rows="10" cols="60" name="Declaration" [(ngModel)]="irule.code"></textarea>
+                <button *ngIf="true || irule.modified" class="dev-click" title="Save iRule to Device" (click)="saveiRuleToBigIP(irule, i)" style="left: 255px;">Save iRule to Big-IP</button>
+                <button class="dev-click" title="Browse to Device" (click)="openBigIPUI(irule.device)" style="left: 255px">Open Big-IP UI</button>
              
 
           </div>
         </li>
+      </ul>
+
+</div>
+
+
+
+<!-- End DG paner, Begin iRule Panel -->
+
+
+<div *ngIf="openCertificatesPanel && admin">
+            <button mat-raised-button title="Back"
+            (click)="openDGPanel=true; openiRulesPanel=false;openCertificatesPanel=false;">Back to DG Panel</button>
+<h2>Certificates from all devices</h2>
+
+      <ul class="certs" style="min-width:1200px">
+            <span class="badge" style="width: 25px">#</span>
+            <span class="badge" style="width: 70px">Device</span>
+            <span class="badge" style="width: 70px">Name</span>
+            <span class="badge" style="width: 125px">Partition</span>
+            <span class="badge" style="width: 125px">Expiration</span>
+            <span class="badge" style="width: 285px">Issuer</span>
+            <span class="badge" style="width: 285px">Subject</span>
+            
+              <li *ngFor="let cert of certs let i=index;" >
+                <div style="width: 1200px" >
+                  <span class="badge" style="vertical-align: top;">{{i+1}}</span>
+                  <span style="vertical-align: top;  display: inline-block; width:100px">{{cert.device}}</span>
+                  <span style="vertical-align: top;  display: inline-block; width:100px">{{cert.name}}</span>
+                  <span style="vertical-align: top;  display: inline-block; width:150px">{{cert.partition}}</span>
+                  <span style="vertical-align: top;  display: inline-block; width:150px">{{cert.expiration}}</span>
+                  <textarea rows="5" cols="35" name="issuer" [(ngModel)]="cert.issuer"></textarea>&nbsp;
+                  <textarea rows="5" cols="35" name="subject" [(ngModel)]="cert.subject"></textarea>
+<!--                  <span style="  display: inline-block; width:250px">{{cert.issuer}}</span>
+                  <span style="  display: inline-block; width:250px">{{cert.subject}}</span>   -->
+
+
+                  <!-- <button class="dev-click" title="Browse to Device" (click)="irule.openCode[i]=!irule.openCode[i]">Open/Close iRule Code"</button> 
+                   
+                       <textarea rows="10" cols="60" name="Declaration" [(ngModel)]="irule.code"></textarea>
+                       <button class="dev-click" title="Browse to Device" (click)="openBigIPUI(irule.device)">Open Big-IP UI</button>
+                   -->
+
+                </div>
+              </li>
+            
+        
       </ul>
 
 </div>
