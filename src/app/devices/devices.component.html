@@ -42,9 +42,9 @@
     <input [(ngModel)]="groupData.name" placeholder="Data-Group Name"/>
     </label><br>
     <label>Type (string, number, IP address):
-    <input [(ngModel)]="groupData.type" placeholder="Data-Group Type"/>
+    <input [(ngModel)]="groupData.type" placeholder="Data-Group Type" value="string"/>
     </label><br>
-      <button (click)="addNewGroup()">Create</button>
+      <button (click)="openDGPanel=true;addNewGroup()">Create</button>
   </div>
 
 
@@ -124,6 +124,12 @@
 
 <div *ngIf="!openDevPanel && openDGPanel">
 
+    <div  class="spinner-wrapper" style="position: relative;">
+      <h2>{{gptitle}}</h2>
+     <mat-spinner *ngIf="(spin && !(noHostnameSub[i] && noHostnameSub[i].length + not_inSync_with_master[i].length + match_with_master[i].length == dataGroups[i].devices.length))" 
+      diameter="35" ></mat-spinner>
+    </div>
+
     <div *ngIf="(admin)">
       <button mat-raised-button routerLink="/getgrpbyurl/" >
         Download Data group by URL
@@ -133,7 +139,7 @@
         Import from local file
       </button>&nbsp;&nbsp;&nbsp;&nbsp;
 
-      <button mat-raised-button (click)="addGroup=true;" >
+      <button mat-raised-button (click)="addGroup=true;openDGPanel=false" >
         Create New Group
       </button>&nbsp;&nbsp;&nbsp;&nbsp;
 
@@ -151,21 +157,17 @@
       </div>
 </div>
 
-<div  class="spinner-wrapper" style="position: relative;">
-  <h2>{{gptitle}}</h2>
- <mat-spinner *ngIf="(spin && !(noHostnameSub[i] && noHostnameSub[i].length + not_inSync_with_master[i].length + match_with_master[i].length == dataGroups[i].devices.length))" 
-  diameter="35" ></mat-spinner>
-</div>
 
-<ul class="products" style="min-width: 850px">
+
+<ul class="products" style="min-width: 960px">
   <li *ngFor="let grp of dataGroups; let i=index;"  style="width: 100%">
     <div (click)="records(i)" >
-      <span class="badge">{{i+1}}</span> <span class= "dgcolumns" style="width: 20%">{{grp.name}}</span>
-      <span class="type">Primary</span> <span class= "dgcolumns" style="width: 20%">{{grp.master}}</span>
-      <span class="type">Subs</span> <span *ngIf="dataGroups[i].devices; else emptyField" class= "dgcolumns" style="width:20px">{{dataGroups[i].devices.length}}</span>
-      <span class="type">Desc</span> <span class= "dgcolumns" style="width: 30%; font-size: 10pt">{{grp.description}}</span>
-    </div>
-    <div>
+      <span class="badge">{{i+1}}</span> <span class= "dgcolumns" style="width: 25%;" title="{{grp.name}}">{{grp.name.substring(0.38)}}</span>
+      <span class="type">Primary</span> <span class= "dgcolumns" style="width: 20%" title="{{grp.master}}">{{grp.master.substring(0,24)}}</span>
+      <span class="type">Subs</span> <span *ngIf="dataGroups[i].devices; else emptyField" class= "dgcolumns" style="width:20px" title="{{dataGroups[i].devices | json}}">{{dataGroups[i].devices.length}}</span>
+      <span class="type">Desc</span> <span class= "dgcolumns" style="width: 30%; font-size: .8em" title="{{grp.description}}">{{grp.description.substring(0, 50)}}</span>
+  </div>
+  <div> 
     <ng-template #emptyField> 0 </ng-template>
      
     <button *ngIf="(dataGroups[i].devices && dataGroups[i].devices.length !=0)"  class="delete" title="Compare Primary to subs"
@@ -242,7 +244,7 @@
 
 
 
-<!-- End DG paner, Begin iRule Panel -->
+<!-- End iRule panel, Begin iRule Certifcate -->
 
 
 <div *ngIf="openCertificatesPanel && admin">

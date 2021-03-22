@@ -19,6 +19,7 @@ export interface GroupData {
   id: string;
   name: string;
   data: string;
+  description: string;
 
 }
 export interface DialogData {
@@ -51,6 +52,7 @@ export class RecordsComponent implements OnInit {
 
   admin:boolean=environment.admin;
   group:any=[];
+  undoTable:any=[];
   save_results:string="Not Saved";  
 
   displayedColumns: string[] = [ 'name', 'data', 'actions'];
@@ -86,8 +88,9 @@ export class RecordsComponent implements OnInit {
   currentDevice:any={};
   s1:any=[];
   public openRecDialog:boolean=false;
+  previewChangesPanel:boolean=false;
   referrer_page:string = "";
-  
+  grpDescription:string ="";
 
 
   ngOnInit() {
@@ -123,12 +126,13 @@ export class RecordsComponent implements OnInit {
     	this.getRecords();
       this.grpSrc = 'BigIP';
       this.data.setGrpSource(this.grpSrc);
-      this.referrer_page = 'dev';
+      this.referrer_page = 'dg';
 
     } else {
       this.data.setGrpSource(this.grpSrc);
 
       this.group = this.results;
+      //console.log ('Group:', this.group);
       //this.group.devices=this.relatedDevices;
       this.data.setGrpData(this.results);
       this.dataSource = new MatTableDataSource(this.results.records);
@@ -136,7 +140,7 @@ export class RecordsComponent implements OnInit {
       this.dataSource.sort = this.sort;
       this.referrer_page = 'dg';
     }
-
+    this.grpDescription=this.group.description;
     this.data.currentMessage.subscribe(save_results => this.save_results = save_results)
 
   }
@@ -158,7 +162,7 @@ export class RecordsComponent implements OnInit {
     console.log(this.route.snapshot.params['id'], this.masterAddress, '-',this.s1);
     this.rest.getGrpFromDevice(this.route.snapshot.params['id'], this.device_hostnames[this.masterAddress], this.s1).subscribe((data: any) => {
       //recs=data;
-      console.log('Get Records: ' );
+      //console.log('Get Records: ' );
       this.group = data;
       //this.group.source = 'BigIP';
       //this.group.devices= this.relatedDevices;
@@ -197,6 +201,7 @@ export class RecordsComponent implements OnInit {
     // Called from table record selection.
       this.recordData.name=key;
       this.recordData.data=value;
+      this.recordData.oldData=value;
       this.recordData.index=index;
     // enables record edit panel
       this.recOperation = op;
@@ -204,8 +209,13 @@ export class RecordsComponent implements OnInit {
 
 
   inMemRecOps(index ,groupname, key, value, op) {
-     console.log('>>> ', index, groupname, key, value, op, this.relatedDevices);
+    if (op != 'ADD') {
+      index=this.group.records.map(e => e.name).indexOf(key);
+    }
 
+    console.log('>>> ', index, groupname, key, value, op, this.grpSrc);
+
+     this.saveUndoTable(key, value, index, op);
      if (this.grpSrc == 'BigIP' ) {
            
            //console.log('Primary hostname: ' , master, this.device_hostnames[this.masterAddress]);
@@ -230,7 +240,9 @@ export class RecordsComponent implements OnInit {
                               //this.dataSource.sort = this.sort;
                           
                       }
-
+                      //
+                      // The following updates secondary devices
+                      //
                       for (var x in this.relatedDevices) {
                             let dest=this.device_hostnames[this.relatedDevices[x]];
                             if (dest==undefined) {
@@ -250,17 +262,17 @@ export class RecordsComponent implements OnInit {
                       if (op=="REPEAT") {
                           this.recOperation='ADD';
                           this.recOps(0,this.group.name,'','','ADD');
-                          this.openDialog();
+                          this.openDialog(this.group);
 
                       } else {
                           this.recOperation="";
                       }
 
-                      if (op=='ADD') {
-                        this.pIndex= Math.ceil(this.paginator.length / this.paginator.pageSize) - 1  ;
+                      //if (op=='ADD') {
+                        //this.pIndex= Math.ceil(this.paginator.length / this.paginator.pageSize) - 1  ;
                         //this.getRecords();
-                        console.log(" Page: ", op, this.paginator.pageSize,this.paginator.length, this.pIndex, this.paginator, this.sort);
-                      }
+                        //console.log(" Page: ", op, this.paginator.pageSize,this.paginator.length, this.pIndex, this.paginator, this.sort);
+                      //}
                   }, (err) => {
                       this.dgPushStatus.push({ dest: dest, label: this.masterAddress , group: groupname, status: op+' Failed on Primary, Aborting.', operation: op});
                       this.pushStatusDataSource = [...this.dgPushStatus];
@@ -287,6 +299,8 @@ export class RecordsComponent implements OnInit {
       this.dataSource = new MatTableDataSource(this.group.records);
       this.dataSource.paginator = this.paginator;
 
+
+
       //console.log(RecordsComponent);
     /*if (this.dataSource._filterChange.getValue() === '') {
         this.dataSource.filter = ' ';
@@ -300,31 +314,51 @@ export class RecordsComponent implements OnInit {
 
 
 updateTable(key, value, index, op) {
-
+// This function update the table to match the datagroup records.
+          console.log('Updatding table:', this.group.records[index], key, value, op);
           if (op=='ADD' || op=='REPEAT') {
               this.group.records.push({"name":key, "data":value});
-              this.getRecords();
-
+              if (this.grpSrc == 'BigIP') {
+                this.getRecords();
+              }
               //this.dataSource.paginator.nextPage();
 
           } else if (op=='UPDATE') {
               this.group.records[index].data=value;
-              console.log('Updated record:', this.group.records[index], key, value);
           } else if (op== 'DELETE') {
-              console.log('Deleted Record:', this.group.records[index], key, value);
               this.group.records.splice(index, 1);
           }
+          //this.ngOnInit();
           this.dataSource = new MatTableDataSource(this.group.records);
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
           //this.dataSource.paginator._changePageSize(this.paginator.pageSize); 
           //this.dataSource.renderRows();
 
-          console.log('datasource1 :', this.group.records);
-          console.log('Adding record after sort:', key, value, this.group.records.indexOf(key));
+          //console.log('Adding record after sort:', key, value, this.group.records.indexOf(key));
 
 }
 
+saveUndoTable(key, value ,index, op) {
+        //Undo table is now limited to 5 records only.
+          console.log('Undo table:', op, this.undoTable, index , value );
+
+          if ( this.undoTable.length > 4) {
+            this.undoTable=this.undoTable.slice(1);
+          }
+          if ( op == 'ADD' || op=='REPEAT') {
+            op='ADD';
+            this.undoTable.push({"operation": op, "name":key, "oldData": value, "newData":value, "dgTableIndex": index});
+          } else if ( op == 'save' ) {
+            this.undoTable.push({"operation": op, "name":"", "oldData": "", "newData":"", "dgTableIndex": "" });
+          } else {
+            // op = UPDATE
+            this.undoTable.push({"operation": op, "name":key, "oldData": this.group.records[index].data , "newData": value, "dgTableIndex": index});
+          }
+          
+
+
+}
 
 
 
@@ -612,14 +646,14 @@ updateTable(key, value, index, op) {
   }
 
 
-  openDialog(): void {
+  openDialog(grp) {
 
     //console.log('Dialog open status', this.openRecDialog);
     if (this.openRecDialog) {
       return;
     }
     const dialogRef = this.dialog.open(recordDataDialog, {
-        width: '450px',
+        width: '650px',
         data: {name: this.recordData.name, data: this.recordData.data, op: this.recOperation}
     });
 
@@ -627,19 +661,64 @@ updateTable(key, value, index, op) {
 
     dialogRef.afterClosed().subscribe(result => {
 
-        //console.log('result data:', result.event,result.data, this.recOperation, this.group.name, this.recordData.index);
+        //console.log('Add/edit dialog data:', result.event,result.data, this.recOperation, this.group.name, this.recordData.index);
 
         this.recordData.name = result.data.name;
         this.recordData.data = result.data.data;
         this.openRecDialog=false;
 
         if ( result.event!='cancel' ) {
-          this.inMemRecOps(this.recordData.index, this.group.name , this.recordData.name, this.recordData.data, result.data.op)
+          this.inMemRecOps(this.recordData.index, this.group.name , result.data.name, result.data.data, result.data.op)
         }
 
     });
 
   }
+
+
+  openPreviewDialog(): void {
+
+    //console.log('Dialog open status', this.openRecDialog);
+    if (this.openRecDialog) {
+      return;
+    }
+    this.previewChangesPanel=true;
+    const dialogRef = this.dialog.open(previewChangesDialog, {
+        width: '950px',
+        data: this.undoTable
+    });
+    
+
+    this.openRecDialog=true;
+
+    dialogRef.afterClosed().subscribe(result => {
+
+        console.log('Undo dialog data:', result.event,result.data);
+        this.openRecDialog=false;
+
+        if ( result.event != 'cancel' || result.event=='save') {
+
+          this.recordData.name = result.data.name;
+          this.recordData.data = result.data.oldData;
+
+          let op=result.data.operation;
+          let index=result.data.dgTableIndex;
+          // Invoked means that this undo operation has been used.
+
+          if (result.event == 'DELETE') {
+            this.undoTable[result.index].invoked='1';
+            op='ADD'
+          } else if (result.event == 'ADD' ) {
+            this.undoTable[result.index].invoked='1';
+            op='DELETE'
+          }
+          this.inMemRecOps(index, this.group.name , result.data.name, result.data.oldData, op)
+        }
+
+    });
+
+  }
+
 
 }
 
@@ -669,6 +748,55 @@ export class recordDataDialog {
     this.dialogRef.close({event: op, data: this.data})
   }
 
+}
+
+// Below is setup for Review Changes dialog
+
+
+@Component({
+  selector: 'previewChangesDialog',
+  templateUrl: 'previewChangesDialog.html',
+  styleUrls: ['./previewChangesDialog.css']
+})
+export class previewChangesDialog {
+
+  displayedColumns = [ 'operation','name', 'oldData', 'Actions'];
+
+  op:string = '';
+  
+
+  constructor(
+    public dialogRef: MatDialogRef<previewChangesDialog>,
+    @Inject(MAT_DIALOG_DATA) public data: recordChangesData) {
+      console.log('dialog data:' , data);
+      //this.local_data = {...data};
+      //this.action = this.local_data.action;
+    }
+
+
+  dataSource = this.data;
+
+  ngOnInit() {
+      //console.log('dialog data:--' , this.dataSource);
+  }
+
+  onCloseClick(): void {
+    this.dialogRef.close({event: 'cancel', data: "", index: 0});
+  }
+
+  undoOp(item) {
+    console.log('undoOP:', item);
+    this.dialogRef.close({event: item.operation, data: item, index: item.index})
+  }
+
+}
+
+export interface recordChangesData {
+  operation: string;
+  name: string;
+  oldData: string;
+  newData: string;
+  dgTableIndex: any;
 }
 
 

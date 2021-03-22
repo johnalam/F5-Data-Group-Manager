@@ -1,6 +1,8 @@
 {
   "name":"IP_Access_list",
   "type":"string",
+  "destinations": "[ bigip1, bitip23, 
+  ]"
   "records":[
         {
           "name":"10.1.1.10",

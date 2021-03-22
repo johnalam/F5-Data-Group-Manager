@@ -1,0 +1,24 @@
+table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.mat-column-operation {
+    width: 10%;
+}
+.mat-column-name {
+    width: 30%;
+}
+.mat-column-oldData {
+    width: 48%;
+}
+.mat-column-Actions {
+    width: 12%;
+}
+.dialog_button {
+	top: 20px;
+	left: 200px;
+	height: 1.5em;
+	width: 3em;
+
+}

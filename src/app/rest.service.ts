@@ -74,8 +74,8 @@ export class RestService {
      ).pipe(
       map(
         data => {
-          console.log('host header: ', data.headers.get('Server'));
-          console.log('body: ',data.body);
+          //console.log('host header: ', data.headers.get('Server'));
+          console.log('DG list from datagroups.json: ',data.body);
           return data;
           //{ "adminRole" : data.headers.get('Server')), "groups": data.body }
         },

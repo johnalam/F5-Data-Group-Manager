@@ -1,0 +1,32 @@
+	<h1 mat-dialog-title>Big-IP Data-Group {{data.op}} Record</h1>
+
+	<div *ngIf="!(data.op=='DELETE')">
+			<div mat-dialog-content>
+			  <mat-form-field>
+			    <mat-label>Record Name/Key:</mat-label>
+			    <input matInput autocomplete="off" [(ngModel)]="data.name" [readonly]="(data.op!='ADD') || (data.op=='DELETE')">
+			  </mat-form-field>
+			</div>
+
+			<div mat-dialog-content>
+			  <mat-form-field>
+			    <mat-label>Record Data:</mat-label>
+			    <input matInput autocomplete="off" [(ngModel)]="data.data" [readonly]="(data.op=='DELETE')">
+			  </mat-form-field>
+			</div>
+	</div>
+	<div *ngIf="(data.op=='DELETE')">
+		<p>
+			<h2 mat-dialog-title>Are you sure you want to delete {{data.name}}?</h2>
+	</div>
+	<div mat-dialog-actions>
+	  <button mat-raised-button (click)="data.op='';onNoClick()">Cancel</button>
+	  <button mat-raised-button  *ngIf="(data.op=='UPDATE') || (data.op=='ADD')" 
+		(click)="op='save';sendOperation(data.op);"
+	    [mat-dialog-close]="data" cdkFocusInitial>Save</button>
+
+	  <button mat-raised-button *ngIf="(data.op=='ADD')"  [mat-dialog-close]="data"  (click)="data.op='REPEAT';sendOperation(data.op)">Save and add another</button>
+
+	<button mat-raised-button *ngIf="(data.op=='DELETE')"  [mat-dialog-close]="data"  (click)="sendOperation(data.op)">Yes Nuke it</button>
+
+	</div>

@@ -47,7 +47,7 @@
   height: 1.8em;
   min-width: 16px;
   text-align: center;
-  margin-right: .8em;
+  margin-right: .4em;
   border-radius: 4px 0 0 4px;
 }
 
@@ -94,7 +94,7 @@
   height: 1.8em;
   min-width: 16px;
   text-align: right;
-  margin-right: .8em;
+  margin-right: .4em;
   border-radius: 4px 0 0 4px;
 }
 
@@ -111,13 +111,14 @@
   height: 1.8em;
   min-width: 16px;
   text-align: left;
-  margin-right: .8em;
+  margin-right: .4em;
   border-radius: 4px 0 0 4px;
 }
 
 .products .dgcolumns {
   line-height: 1;
   display: inline-block;
+  font-size: 1em;
 }
 
 .mine {
@@ -144,7 +145,7 @@ button:hover {
 }
 
 button.delete {
-  left: 855px;
+  left: 965px;
   top: -39px;
   background-color: gray !important;
   color: white;
@@ -154,7 +155,7 @@ button.delete {
   margin: 2px;
 }
 button.message {
-  left: 875px;
+  left: 965px;
   top: -39px;
   color: black;
   font-size: 10px;
@@ -164,7 +165,7 @@ button.message {
 }
 
 button.dev-click {
-  left: 657px;
+  left: 757px;
   top: -39px;
   background-color: gray !important;
   color: white;
@@ -174,7 +175,7 @@ button.dev-click {
 
 }
 button.dev-message {
-  left: 677px;
+  left: 727px;
   top: -39px;
   color: black;
   font-size: 10px;

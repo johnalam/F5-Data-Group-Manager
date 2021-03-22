@@ -10,12 +10,13 @@ import { ProductDetailComponent } from './product-detail/product-detail.componen
 import { ProductEditComponent } from './product-edit/product-edit.component';
 import { ProductAddComponent } from './product-add/product-add.component';
 import { RecordsComponent } from './records/records.component';
-import { recordDataDialog } from './records/records.component';
+import { recordDataDialog, previewChangesDialog } from './records/records.component';
 import { RecordDetailsComponent } from './record-details/record-details.component';
 import { MatFormFieldModule } from '@angular/material';
 import { MatIconModule } from '@angular/material/icon';        
 import {  MatTableModule, 
-          MatProgressSpinnerModule
+          MatProgressSpinnerModule,
+          MatTooltipModule
        } from '@angular/material' ;
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -79,7 +80,7 @@ const appRoutes: Routes = [
 ];
 
 @NgModule({
-  entryComponents: [RecordsComponent, recordDataDialog ],
+  entryComponents: [RecordsComponent, recordDataDialog, previewChangesDialog ],
   declarations: [
     AppComponent,
     ProductComponent,
@@ -90,7 +91,8 @@ const appRoutes: Routes = [
     RecordDetailsComponent,
     DevicesComponent,
     GetgrpbyURLComponent,
-    recordDataDialog
+    recordDataDialog,
+    previewChangesDialog
   ],
   exports: [
     MatIconModule,
@@ -112,6 +114,7 @@ const appRoutes: Routes = [
     MatButtonModule,
     MatSortModule,
     MatIconModule,
+    MatTooltipModule,
     BrowserAnimationsModule,
     MatProgressSpinnerModule,
     MatDialogModule 

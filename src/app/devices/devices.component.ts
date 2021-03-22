@@ -201,9 +201,12 @@ export class DevicesComponent implements OnInit {
     this.rest.getGrpFromDevice(this.dataGroups[i].on_box_name, this.device_hostnames[this.dataGroups[i].master], this.s1).subscribe((group: any) => {
     	// group:  datagroup records from BigIP.
     	// dataGroups[i] is datagroup metadata from datagroups.JSON file.
+    	// adding description field from the JSON input file because group from BigIP does not have it.
+      group.description=this.dataGroups[i].description;
    	  this.data.setGrpData(group);
+   	  //console.log('DG from primary device:', group);
    	  this.data.setGrpSource('BigIP');
-   	  // Not sure why i did not name tht currentGroup, instead of currentDevice
+   	  // Not sure why i did not name that currentGroup, instead of currentDevice
  	  this.data.setCurrentGroup(this.dataGroups[i]);
       this.group_missing_on_master[i]=true;
       this.dataGroups[i].exists = 'yes';
