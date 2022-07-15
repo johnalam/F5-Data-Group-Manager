@@ -1,7 +1,7 @@
 
 # F5-data-group-manager
 
-Manage iRule data-groups from a central location.
+Manage iRule data-groups from a central location.  Manage a data-group across multiple BigIPs with synchronization.
 
 
 
@@ -9,15 +9,15 @@ Requirements:
 
 	1- Content of dist-user or dist/F5IQ file from this depository.
 
-	    *dist/F5IQ is the full version.  It includes Big-IP device management.  Allow upload of scripts to Big-IP.  Also allows managing data-group on each Big-IP.  Also allows exporting Virtual server configuration to F5 AS3 declarations.  This version is to be used by admins.
+	    *dist/F5IQ is the full version.  It includes Big-IP device management.  Allows managing data-group on each Big-IP.  Also allows exporting Virtual server configuration to F5 AS3 declarations.  This version is to be used by admins.
 
-	    *dist-user lacks the device management.  To be used by a user.  Only allows editing the data-groups.
+	    *dist-user lacks the device management.  To be used by a user. (Obsoleted, do not use)
 
-	    *copy these files to the nginx root html directory.  /usr/share/nginx/html
+	    *copy these files to the nginx root html directory.  E.G. "/usr/share/nginx/html" .
 
 	2- NGINX web server and reverse proxy.  
 
-	    *Use provided default.conf file in the nginx directory. Put this file in /etc/nginx/confg.d. 
+	    *Use provided default.conf file in the nginx directory. Put this file in /etc/nginx/confg.d. (or where you like if you are an advanced NGINX users)
 
 	    *The /etc/nginx/nginx.conf file can remain at default.
 
@@ -25,11 +25,13 @@ Requirements:
 
 	4- A username and password for a service account that works on all BigIPs.
 
-	    *The service account only needs permission to manage data-groups, "LTM manager".  
+	    *The service account only needs permission to manage data-groups, You can use the BigIP Role "LTM manager".  
 
-	    *You must configure these credentials in the NGINX default.conf file.  See provided default.conf file for and example. 
+	    *You must configure these credentials in the "server" block of the NGINX config file.  See provided default.conf file for and example.
+	    
+	    *There are multiple "location" blocks under the "server" block.  Some have a "root" directive.  Make sure this points to the directory where you stored the downloaded file.  E.G. "/usr/share/nginx/html"
 
-	    *The App sends the creds to the BigIP using Basic auth.  
+	    *The creds stay on the NGINX.  Never used by the browser.  NGINX sends the creds to the BigIP using Basic auth.  
 
 	    *You will need to encode "username:password" in base64 and update the default.conf file with new value.  
 
@@ -48,18 +50,7 @@ Nginx acts as both a webserver and a reverse proxy for this app.  The default.co
 
 Under /src/assets you will find examples of files to track F5 BigIP devices as well as data-groups.  The data-groups file lists a cluster of devices that will hold a copy of each data-group.  It will also list a Master device.  The Master device is considered the source of truth for the data-group records and data.
 
-Only internal data-groups are handled initially.
+Only internal data-groups are handled.  This tool renders external data-groups obsolete in most cases.
 
-In order to add/edit/delete one record at a time, this app relies on a BigIP TMSH CLI script.  The script is 'RUN' or executed via a REST API request.  The operation (add, edit, delete) is passed along to the script along with the data in the API request POST body.  This is equivalent to running the script from the TMSH CLI.  The name of the script is "add-rec" initially.
-
-The script must be uploaded to the BigIPs.  The App provides a way to upload the script to one device at a time via a single click.  Open the "Devices Management" panel to list the Big-IP devices and see the "Upload DG Script" Buttons, one for each row or each device.
-
-	* NOTE: you need to save the config for the script upload to survive a BigIP reboot.  For now, the only way to save config from the App is in the data-group editing screen.
-
-There are two versions of the script under assets directory:
-
-	1- dg_script_ready_for_POST.json .  this file ready to be POSTed to the BigIP via a REST call.  The App helps with this.  You can use the App to list all the devices found in devices.json and click the button to upload the script.
-
-	2- records_CRUD_Script , a human readable version of the script.  Note, it may not always be the latest.
 
 
