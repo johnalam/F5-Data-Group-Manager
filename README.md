@@ -8,7 +8,9 @@ Note, only the change you make is sent to the Big-IP, not the entire datagroup.
 
 The Primary Big-IP is always the source of truth.  The App allows you to verify synchronization between the Primary and all the secondaries.  You can also ensure sunchronization manually.
 
-The App allows you to import a datagroup from a web location such as github.  It also allows import from local file.  The imported datagroup has to be in JSON format.  After import you can post it to the Big-IP.  For now there is no way to Post or Save to anything other than a Big-IP.
+The App allows you to import a datagroup from a web location such as github.  It also allows import from local file.  The imported datagroup has to be in F5 TMSH format.  See example here:  https://raw.githubusercontent.com/johnalam/F5-Data-Group-Manager/master/src/assets/sample_DG_tmsh_format
+
+After import you can post it to the Big-IP.  For now there is no way to Post or Save to anything other than a Big-IP.
 
 Requirements:
 
@@ -46,6 +48,30 @@ Requirements:
 
 	    * This is the line that needs to change:
 			proxy_set_header Authorization 'Basic YWRtaW46YWRtaW4=';
+
+	5- Two JSON formated files are essential.  The devices.json and the datagroups.json.  
+	   * The devices.json file contains a list of devices.
+	   	See src/assets/devices.json for an example.
+	   	The fields are as follows:
+			"name" is a short and conveient name for display.
+			"description" is anything.
+			"connections" is a list of the actual hostname of the Big-IP and its High Availability peers.  Order does not matter.
+	    * The datagroups.json file contains a list of datagroups to be managed.
+	    	See src/addets/datagroups.json for an example.
+		The fields are as follows:
+			"name" is a short and conveient name for display.
+			"on_box_name" is the actual name of the datagroup as the Big-IP knows it.
+			"type" the datagroup type as the Big-IP knows it.
+			"description" is anything.
+			"master" is the short name of the Big-IP devices that will hold the primary copy of the datagroup (the source of truth).
+			"devices" is a list of the short names of the Big-IPs that will have copies of the datagroup.  Excluding the primary device.
+		
+		You can get a list of datagroups on a Big-IP from the CLI using this TMSH/bash command:
+			tmsh list ltm data-group | grep ltm | awk -F ' ' '{printf $4}' >list_of_DGs
+		You can then merge that list to create the datagroups.json using a bash script.
+		
+			
+
 
 
 Nginx acts as both a webserver and a reverse proxy for this app.  The default.conf file has commands to:
