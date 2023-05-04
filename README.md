@@ -3,7 +3,12 @@
 
 Manage iRule data-groups from a central location.  Manage a data-group across multiple BigIPs with synchronization.
 
+You can perform CRUD operations with UNDO capabilities on a datagroup using a GUI app.  When you change a record, this changes is sent to all the Big-IPs where the datagroup resides.
+Note, only the change you make is sent to the Big-IP, not the entire datagroup.
 
+The Primary Big-IP is always the source of truth.  The App allows you to verify synchronization between the Primary and all the secondaries.  You can also ensure sunchronization manually.
+
+The App allows you to import a datagroup from a web location such as github.  It also allows import from local file.  The imported datagroup has to be in JSON format.  After import you can post it to the Big-IP.  For now there is no way to Post or Save to anything other than a Big-IP.
 
 Requirements:
 
@@ -13,7 +18,7 @@ Requirements:
 
 	    *dist-user lacks the device management.  To be used by a user. (Obsoleted, do not use)
 
-	    *copy these files to the nginx root html directory.  E.G. "/usr/share/nginx/html" .
+	    *copy files in dist/F5IQ to the nginx root html directory.  E.G. "/usr/share/nginx/html" .
 
 	2- NGINX web server and reverse proxy.  
 
@@ -34,6 +39,10 @@ Requirements:
 	    *The creds stay on the NGINX.  Never used by the browser.  NGINX sends the creds to the BigIP using Basic auth.  
 
 	    *You will need to encode "username:password" in base64 and update the default.conf file with new value.  
+
+	    * use the linux "base64" command (or any other tool) to encode a string in this format: 'admin:<password>' to base64.
+	    		
+			"admin:admin" becomes "YWRtaW46YWRtaW4=".  Put that in the Authorization header as you see below.
 
 	    * This is the line that needs to change:
 			proxy_set_header Authorization 'Basic YWRtaW46YWRtaW4=';
